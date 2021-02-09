@@ -1,0 +1,41 @@
+{
+  "defaultSeverity": "warning",
+  "extends": "tslint:recommended",
+  "jsRules": {
+    "quotemark": false,
+    "object-literal-sort-keys": false
+  },
+  "rules": {
+    "arrow-parens": [true, "ban-single-arg-parens"],
+    "comment-format": false,
+    "forin": false,
+    "interface-name": [true, "never-prefix"],
+    "max-line-length": false,
+    "member-ordering": false,
+    "no-string-literal": false,
+    "no-unused-variable": true,
+    "object-literal-key-quotes": [true, "as-needed"],
+    "object-literal-sort-keys": false,
+    "quotemark": false,
+    "trailing-comma": false,
+    "whitespace": [
+      true,
+      "check-branch",
+      "check-decl",
+      "check-module",
+      "check-operator",
+      "check-preblock",
+      "check-rest-spread",
+      "check-separator",
+      "check-type",
+      "check-type-operator",
+      "check-typecast"
+    ]
+  },
+  "rulesDirectory": [],
+  "linterOptions": {
+    "exclude": [
+      "./node_modules"
+    ]
+  }
+}

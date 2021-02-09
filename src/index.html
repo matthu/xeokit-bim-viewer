@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+  <title>xeokit BIM Viewer</title>
+
+  <!-- BIMViewer styles -->
+  <link rel="stylesheet" type="text/css" href="./dist/lib/fontawesome-free-5.11.2-web/css/all.min.css"/>
+  <link rel="stylesheet" type="text/css" href="/dist/css/BIMViewer.css"/>
+
+  <!-- App style -->
+  <link rel="stylesheet" type="text/css" href="/dist/css/style.css"/>
+
+  <!-- App tooltips style -->
+  <link rel="stylesheet" type="text/css" href="/dist/css/backdrop.css"/>
+</head>
+
+<body>
+  <div id="app-root" class=""></div>
+  <div id="myViewer" class="xeokit-busy-modal-backdrop">
+    <div id="myExplorer" class="active"></div>
+    <div id="myContent">
+        <div id="myToolbar"></div>
+        <canvas id="myCanvas"></canvas>
+    </div>
+    </div>
+    <canvas id="myNavCubeCanvas"></canvas>
+</body>
+</html>

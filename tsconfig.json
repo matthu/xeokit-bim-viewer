@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "outDir": "./dist",
+    "sourceMap": true,
+    "noImplicitAny": true,
+    "module": "commonjs",
+    "target": "es6",
+    "lib": [
+      "dom",
+      "es5",
+      "es6",
+      "es2016.array.include"
+    ],
+    "jsx": "react",
+    "allowJs": true,
+    "esModuleInterop": true,
+  },
+  "exclude": ["node_modules", "webpack.*.js"]
+}
