@@ -10,7 +10,7 @@ module.exports = merge(common, {
     new UglifyJSPlugin(),
     new HtmlWebpackPlugin({
       template: './src/index.html',
-      favicon: './src/favicon.ico',
+      // favicon: './src/favicon.ico',
       minify: {
         collapseWhitespace: true,
         conservativeCollapse: true,

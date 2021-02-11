@@ -1,0 +1,33 @@
+export class EmphasisFillRenderer {
+    private constructor();
+    put(): void;
+    webglContextRestored(): void;
+    _program: any;
+    drawMesh(frameCtx: any, mesh: any, mode: any): void;
+    _lastMaterialId: any;
+    _lastGeometryId: any;
+    _allocate(mesh: any): void;
+    errors: any;
+    _uPositionsDecodeMatrix: any;
+    _uModelMatrix: any;
+    _uModelNormalMatrix: any;
+    _uViewMatrix: any;
+    _uViewNormalMatrix: any;
+    _uProjMatrix: any;
+    _uLightAmbient: any[];
+    _uLightColor: any[];
+    _uLightDir: any[];
+    _uLightPos: any[];
+    _uLightAttenuation: any[];
+    _uSectionPlanes: any[];
+    _uFillColor: any;
+    _aPosition: any;
+    _aNormal: any;
+    _uClippable: any;
+    _uGammaFactor: any;
+    _uOffset: any;
+    _uLogDepthBufFC: any;
+    _lastVertexBufsId: any;
+    _bindProgram(frameCtx: any): void;
+    _lastIndicesBufId: any;
+}
