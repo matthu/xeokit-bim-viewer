@@ -1,3 +1,5 @@
+import * as React from 'react';
+import { Theme, withStyles, WithStyles } from '@material-ui/core/styles';
 import { BCFViewpointsPlugin } from "@xeokit/xeokit-sdk/src/plugins/BCFViewpointsPlugin/BCFViewpointsPlugin.js";
 import { Entity } from "@xeokit/xeokit-sdk/src/viewer/scene/Entity.js";
 import { AmbientLight } from "@xeokit/xeokit-sdk/src/viewer/scene/lights/AmbientLight.js";
@@ -23,82 +25,7 @@ import { ResetAction } from "./toolbar/ResetAction";
 import { SectionTool } from "./toolbar/SectionTool";
 import { SelectionTool } from "./toolbar/SelectionTool";
 import { ThreeDMode } from "./toolbar/ThreeDMode";
-
-function createExplorerTemplate(cfg: any) {
-    const explorerTemplate = `<div class="xeokit-tabs">
-    <div class="xeokit-tab xeokit-modelsTab">
-        <a class="xeokit-tab-btn" href="#">Models</a>
-        <div class="xeokit-tab-content">
-            <div class="xeokit-btn-group">
-                <button type="button" class="xeokit-loadAllModels xeokit-btn disabled" data-tippy-content="Load all models">Load all</button>
-                <button type="button" class="xeokit-unloadAllModels xeokit-btn disabled" data-tippy-content="Unload all models">Unload all</button>` +
-        (cfg.enableEditModels ? `<button type="button" class="xeokit-addModel xeokit-btn disabled" data-tippy-content="Add model">Add</button>` : ``) +
-        `</div>
-            <div class="xeokit-models" ></div>
-        </div>
-    </div>
-    <div class="xeokit-tab xeokit-objectsTab">
-        <a class="xeokit-tab-btn disabled" href="#">Objects</a>
-        <div class="xeokit-tab-content">
-         <div class="xeokit-btn-group">
-            <button type="button" class="xeokit-showAllObjects xeokit-btn disabled" data-tippy-content="Show all objects">Show all</button>
-            <button type="button" class="xeokit-hideAllObjects xeokit-btn disabled" data-tippy-content="Hide all objects">Hide all</button>
-        </div>
-        <div class="xeokit-objects xeokit-tree-panel" ></div>
-        </div>
-    </div>
-    <div class="xeokit-tab xeokit-classesTab">
-        <a class="xeokit-tab-btn disabled" href="#">Classes</a>
-        <div class="xeokit-tab-content">
-            <div class="xeokit-btn-group">
-                <button type="button" class="xeokit-showAllClasses xeokit-btn disabled" data-tippy-content="Show all classes">Show all</button>
-                <button type="button" class="xeokit-hideAllClasses xeokit-btn disabled" data-tippy-content="Hide all classes">Hide all</button>
-            </div>
-            <div class="xeokit-classes xeokit-tree-panel" ></div>
-        </div>
-    </div>
-     <div class="xeokit-tab xeokit-storeysTab">
-        <a class="xeokit-tab-btn disabled" href="#">Storeys</a>
-        <div class="xeokit-tab-content">
-         <div class="xeokit-btn-group">
-                <button type="button" class="xeokit-showAllStoreys xeokit-btn disabled" data-tippy-content="Show all storeys">Show all</button>
-                <button type="button" class="xeokit-hideAllStoreys xeokit-btn disabled" data-tippy-content="Hide all storeys">Hide all</button>
-            </div>
-             <div class="xeokit-storeys xeokit-tree-panel"></div>
-        </div>
-    </div>
-</div>`;
-    return explorerTemplate;
-}
-
-const toolbarTemplate = `<div class="xeokit-toolbar">
-    <!-- Reset button -->
-    <div class="xeokit-btn-group">
-        <button type="button" class="xeokit-reset xeokit-btn fa fa-home fa-2x disabled" data-tippy-content="Reset view"></button>
-    </div>
-    <div class="xeokit-btn-group" role="group">
-        <!-- 3D Mode button -->
-        <button type="button" class="xeokit-threeD xeokit-btn fa fa-cube fa-2x" data-tippy-content="Toggle 2D/3D"></button>
-        <!-- Perspective/Ortho Mode button -->
-        <button type="button" class="xeokit-ortho xeokit-btn fa fa-th fa-2x" data-tippy-content="Toggle Perspective/Ortho"></button>
-        <!-- Fit button -->
-        <button type="button" class="xeokit-fit xeokit-btn fa fa-crop fa-2x disabled" data-tippy-content="View fit"></button>   
-        <!-- First Person mode button -->
-        <button type="button" class="xeokit-firstPerson xeokit-btn fa fa-male fa-2x disabled" data-tippy-content="First person"></button>
-    </div>
-    <!-- Tools button group -->
-    <div class="xeokit-btn-group" role="group">
-        <!-- Hide tool button -->
-        <button type="button" class="xeokit-hide xeokit-btn fa fa-eraser fa-2x disabled" data-tippy-content="Hide objects"></button>
-        <!-- Select tool button -->
-        <button type="button" class="xeokit-select xeokit-btn fa fa-mouse-pointer fa-2x disabled" data-tippy-content="Select objects"></button>
-        <!-- Query tool button -->
-        <button type="button" class="xeokit-query xeokit-btn fa fa-info-circle fa-2x disabled" data-tippy-content="Query objects"></button>
-        <!-- section tool button -->
-        <button type="button" class="xeokit-section xeokit-btn fa fa-cut fa-2x disabled" data-tippy-content="Slice objects"><div class="xeokit-section-menu-button"><span class="xeokit-arrow-down xeokit-section-menu-button-arrow"></span></div><div class="xeokit-section-counter" data-tippy-content="Number of existing slices"></div></button>
-    </div>
-
-</div>`;
+import { Map } from '@xeokit/xeokit-sdk/src/viewer/scene/utils/Map.js';
 
 function initTabs(containerElement: Element) {
 
@@ -204,14 +131,27 @@ export interface MetaData {
   children: any[];
 }
 
+const styles = () => ({
+  root: {
+  }
+});
+
+interface Props extends BIMConfig, WithStyles<typeof styles> {
+  ref: any;
+  server: any;
+}
+
 /**
  * @desc A BIM viewer based on the [xeokit SDK](http://xeokit.io).
  *
  *
  */
-class BIMViewer extends Controller {
-
+export class BIMViewer extends React.Component<Props> {
     cfg: BIMConfig;
+
+    bimViewer: BIMViewer;
+    server: any;
+    viewer: Viewer;
 
     _configs: any;
     _enableAddModels: boolean;
@@ -240,36 +180,89 @@ class BIMViewer extends Controller {
     _classesExplorer: ClassesExplorer;
     _storeysExplorer: StoreysExplorer;
 
+    // Controller properties
+    _children: Controller[];
+    _subIdMap: Map;
+    _subIdEvents: any;
+    _eventSubs: any;
+    _events: any;
+    _eventCallDepth: number;
+    _enabled: boolean;
+    _active: boolean;
+    _destroyed: boolean;
+
+    canvasElementRef: React.RefObject<any>;
+    explorerElementRef: React.RefObject<any>;
+    toolbarElementRef: React.RefObject<any>;
+    navCubeCanvasElementRef: React.RefObject<any>;
+    busyModelBackdropElementRef: React.RefObject<any>;
+
     /**
      * Constructs a BIMViewer.
      * @param {Server} server Data access strategy.
      * @param {*} cfg Configuration.
      * @param {Boolean} [cfg.enableEditModels=false] Set ````true```` to show "Add", "Edit" and "Delete" options in the Models tab's context menu.
      */
-    constructor(server: Server, cfg: BIMConfig = {}) {
+    constructor(props: Props) {
 
-        if (!cfg.canvasElement) {
-            throw "Config expected: canvasElement";
-        }
+        // if (!props.cfg.canvasElement) {
+        //     throw "Config expected: canvasElement";
+        // }
 
-        if (!cfg.explorerElement) {
-            throw "Config expected: explorerElement";
-        }
+        // if (!props.cfg.explorerElement) {
+        //     throw "Config expected: explorerElement";
+        // }
 
-        if (!cfg.toolbarElement) {
-            throw "Config expected: toolbarElement";
-        }
+        // if (!props.cfg.toolbarElement) {
+        //     throw "Config expected: toolbarElement";
+        // }
 
-        if (!cfg.navCubeCanvasElement) {
-            throw "Config expected: navCubeCanvasElement";
-        }
+        // if (!props.cfg.navCubeCanvasElement) {
+        //     throw "Config expected: navCubeCanvasElement";
+        // }
 
-        const canvasElement: HTMLCanvasElement = cfg.canvasElement;
-        const explorerElement: HTMLElement = cfg.explorerElement;
-        const toolbarElement: HTMLElement = cfg.toolbarElement;
-        const navCubeCanvasElement: HTMLCanvasElement = cfg.navCubeCanvasElement;
-        const queryInfoPanelElement: HTMLElement = cfg.queryInfoPanelElement;
-        const busyModelBackdropElement: HTMLElement = cfg.busyModelBackdropElement;
+        
+        // super(null, cfg, server, viewer);
+        super(props);
+
+        this.canvasElementRef = React.createRef();
+        this.explorerElementRef = React.createRef();
+        this.toolbarElementRef = React.createRef();
+        this.navCubeCanvasElementRef = React.createRef();
+        this.busyModelBackdropElementRef = React.createRef();
+        
+        this.server = props.server;
+        this._children = [];
+
+        // if (parent) {
+        //     parent._children.push(this);
+        // }
+
+        this._subIdMap = null; // Subscription subId pool
+        this._subIdEvents = null; // Subscription subIds mapped to event names
+        this._eventSubs = null; // Event names mapped to subscribers
+        this._events = null; // Maps names to events
+        this._eventCallDepth = 0; // Helps us catch stack overflows from recursive events
+
+        this._enabled = null; // Used by #setEnabled() and #getEnabled()
+        this._active = null; // Used by #setActive() and #getActive()
+
+        this._configs = {};
+        this._enableAddModels = !!props.enableEditModels;
+    }
+
+    public componentDidMount() {
+        const canvasElement: HTMLCanvasElement = this.canvasElementRef.current;
+        const explorerElement: HTMLElement = this.explorerElementRef.current;
+        const toolbarElement: HTMLElement = this.toolbarElementRef.current;
+        const navCubeCanvasElement: HTMLCanvasElement = this.navCubeCanvasElementRef.current;
+        // const queryInfoPanelElement: HTMLElement = props.queryInfoPanelElement;
+        const busyModelBackdropElement: HTMLElement = this.busyModelBackdropElementRef.current;
+      
+        this.viewer = new Viewer({
+            canvasElement: canvasElement,
+            transparent: true
+        });
 
         explorerElement.oncontextmenu = (e: Event) => {
             e.preventDefault();
@@ -282,31 +275,17 @@ class BIMViewer extends Controller {
         navCubeCanvasElement.oncontextmenu = (e: Event) => {
             e.preventDefault();
         };
-
-        const viewer = new Viewer({
-            canvasElement: canvasElement,
-            transparent: true
-        });
-
-        super(null, cfg, server, viewer);
-
-        this._configs = {};
-
         /**
          * The xeokit [Viewer](https://xeokit.github.io/xeokit-sdk/docs/class/src/viewer/Viewer.js~Viewer.html) at the core of this BIMViewer.
          *
          * @type {Viewer}
          */
-        this.viewer = viewer;
-
         this._customizeViewer();
         this._initCanvasContextMenus();
         this._initConfigs();
 
-        this._enableAddModels = !!cfg.enableEditModels;
-
-        explorerElement.innerHTML = createExplorerTemplate(cfg);
-        toolbarElement.innerHTML = toolbarTemplate;
+        // explorerElement.innerHTML = createExplorerTemplate(props);
+        // toolbarElement.innerHTML = toolbarTemplate;
 
         this._explorerElement = explorerElement;
 
@@ -409,7 +388,7 @@ class BIMViewer extends Controller {
 
         this._queryTool = new QueryTool(this, {
             buttonElement: toolbarElement.querySelector(".xeokit-query"),
-            queryInfoPanelElement: queryInfoPanelElement,
+            // queryInfoPanelElement: queryInfoPanelElement,
             active: false
         });
 
@@ -1917,15 +1896,375 @@ class BIMViewer extends Controller {
     }
 
     /**
-     * Destroys the viewer, freeing all resources.
+     * Fires an event on this Controller.
+     *
+     * @protected
+     *
+     * @param {String} event The event type name
+     * @param {Object} value The event parameters
+     * @param {Boolean} [forget=false] When true, does not retain for subsequent subscribers
      */
-    destroy() {
-        this.viewer.destroy();
-        this._bcfViewpointsPlugin.destroy();
-        this._canvasContextMenu.destroy();
-        this._objectContextMenu.destroy();
-    }
+    fire(event: string, value: {}, forget = false) {
+      if (!this._events) {
+          this._events = {};
+      }
+      if (!this._eventSubs) {
+          this._eventSubs = {};
+      }
+      if (forget !== true) {
+          this._events[event] = value || true; // Save notification
+      }
+      const subs = this._eventSubs[event];
+      let sub;
+      if (subs) { // Notify subscriptions
+          for (const subId in subs) {
+              if (subs.hasOwnProperty(subId)) {
+                  sub = subs[subId];
+                  this._eventCallDepth++;
+                  if (this._eventCallDepth < 300) {
+                      sub.callback.call(sub.scope, value);
+                  } else {
+                      this.error("fire: potential stack overflow from recursive event '" + event + "' - dropping this event");
+                  }
+                  this._eventCallDepth--;
+              }
+          }
+      }
+  }
+
+  /**
+   * Subscribes to an event on this Controller.
+   *
+   * The callback is be called with this component as scope.
+   *
+   * @param {String} event The event
+   * @param {Function} callback Called fired on the event
+   * @param {Object} [scope=this] Scope for the callback
+   * @return {String} Handle to the subscription, which may be used to unsubscribe with {@link #off}.
+   */
+  on(event: string, callback: any, scope = this): string {
+      if (!this._events) {
+          this._events = {};
+      }
+      if (!this._subIdMap) {
+          this._subIdMap = new Map(); // Subscription subId pool
+      }
+      if (!this._subIdEvents) {
+          this._subIdEvents = {};
+      }
+      if (!this._eventSubs) {
+          this._eventSubs = {};
+      }
+      let subs = this._eventSubs[event];
+      if (!subs) {
+          subs = {};
+          this._eventSubs[event] = subs;
+      }
+      const subId = this._subIdMap.addItem(); // Create unique subId
+      subs[subId] = {
+          callback: callback,
+          scope: scope || this
+      };
+      this._subIdEvents[subId] = event;
+      const value = this._events[event];
+      if (value !== undefined) { // A publication exists, notify callback immediately
+          callback.call(scope || this, value);
+      }
+      return subId;
+  }
+
+  /**
+   * Cancels an event subscription that was previously made with {@link Controller#on} or {@link Controller#once}.
+   *
+   * @param {String} subId Subscription ID
+   */
+  off(subId: string) {
+      if (subId === undefined || subId === null) {
+          return;
+      }
+      if (!this._subIdEvents) {
+          return;
+      }
+      const event = this._subIdEvents[subId];
+      if (event) {
+          delete this._subIdEvents[subId];
+          const subs = this._eventSubs[event];
+          if (subs) {
+              delete subs[subId];
+          }
+          this._subIdMap.removeItem(subId); // Release subId
+      }
+  }
+
+  /**
+   * Subscribes to the next occurrence of the given event, then un-subscribes as soon as the event is handled.
+   *
+   * This is equivalent to calling {@link Controller#on}, and then calling {@link Controller#off} inside the callback function.
+   *
+   * @param {String} event Data event to listen to
+   * @param {Function} callback Called when fresh data is available at the event
+   * @param {Object} [scope=this] Scope for the callback
+   */
+  once(event: string, callback: any, scope = this) {
+      const self = this;
+      const subId = this.on(event,
+          function (value: string) {
+              self.off(subId);
+              callback.call(scope || this, value);
+          },
+          scope);
+  }
+
+  /**
+   * Logs a console debugging message for this Controller.
+   *
+   * The console message will have this format: *````[LOG] [<component type> <component id>: <message>````*
+   *
+   * @protected
+   *
+   * @param {String} message The message to log
+   */
+  log(message: string) {
+      message = "[LOG] " + message;
+      window.console.log(message);
+  }
+
+  /**
+   * Logs a warning for this Controller to the JavaScript console.
+   *
+   * The console message will have this format: *````[WARN] [<component type> =<component id>: <message>````*
+   *
+   * @protected
+   *
+   * @param {String} message The message to log
+   */
+  warn(message: string) {
+      message = "[WARN] " + message;
+      window.console.warn(message);
+  }
+
+  /**
+   * Logs an error for this Controller to the JavaScript console.
+   *
+   * The console message will have this format: *````[ERROR] [<component type> =<component id>: <message>````*
+   *
+   * @protected
+   *
+   * @param {String} message The message to log
+   */
+  error(message: string) {
+      message = "[ERROR] " + message;
+      window.console.error(message);
+  }
+
+  _mutexActivation(controllers: Controller[]) {
+      const numControllers = controllers.length;
+      for (let i = 0; i < numControllers; i++) {
+          const controller = controllers[i];
+          controller.on("active", (function () {
+              const _i = i;
+              return function (active: boolean) {
+                  if (!active) {
+                      return;
+                  }
+                  for (let j = 0; j < numControllers; j++) {
+                      if (j === _i) {
+                          continue;
+                      }
+                      controllers[j].setActive(false);
+                  }
+              };
+          })());
+      }
+  }
+
+  /**
+   * Enables or disables this Controller.
+   *
+   * Fires an "enabled" event on update.
+   *
+   * @protected
+   *
+   *
+   * @param {boolean} enabled Whether or not to enable.
+   */
+  setEnabled(enabled: boolean) {
+      if (this._enabled === enabled) {
+          return;
+      }
+      this._enabled = enabled;
+      this.fire("enabled", this._enabled);
+  }
+
+  /**
+   * Gets whether or not this Controller is enabled.
+   *
+   * @protected
+   *
+   * @returns {boolean}
+   */
+  getEnabled() {
+      return this._enabled;
+  }
+
+  /**
+   * Activates or deactivates this Controller.
+   *
+   * Fires an "active" event on update.
+   *
+   * @protected
+   *
+   * @param {boolean} active Whether or not to activate.
+   */
+  setActive(active: boolean) {
+      if (this._active === active) {
+          return;
+      }
+      this._active = active;
+      this.fire("active", this._active);
+  }
+
+  /**
+   * Gets whether or not this Controller is active.
+   *
+   * @protected
+   *
+   * @returns {boolean}
+   */
+  getActive() {
+      return this._active;
+  }
+
+  /**
+   * Destroys this Controller.
+   *
+   * @protected
+   *
+   */
+  destroy() {
+      if (this._destroyed) {
+          return;
+      }
+      /**
+       * Fired when this Controller is destroyed.
+       * @event destroyed
+       */
+      this.viewer.destroy();
+      this._bcfViewpointsPlugin.destroy();
+      this._canvasContextMenu.destroy();
+      this._objectContextMenu.destroy();
+      this.fire("destroyed", this._destroyed = true);
+      this._subIdMap = null;
+      this._subIdEvents = null;
+      this._eventSubs = null;
+      this._events = null;
+      this._eventCallDepth = 0;
+      for (let i = 0, len = this._children.length; i < len; i++) {
+          (this._children[i] as Controller).destroy();
+      }
+      this._children = [];
+  }
+
+  public render() {
+    return (
+      <>
+        <div id="myViewer" className="xeokit-busy-modal-backdrop" ref={this.busyModelBackdropElementRef}>
+          <div id="myExplorer" className="active" ref={this.explorerElementRef}>
+            <div className="xeokit-tabs">
+              <div className="xeokit-tab xeokit-modelsTab">
+                <a className="xeokit-tab-btn" href="#">Models</a>
+                <div className="xeokit-tab-content">
+                  <div className="xeokit-btn-group">
+                    <button type="button" className="xeokit-loadAllModels xeokit-btn disabled" data-tippy-content="Load all models">Load all</button>
+                    <button type="button" className="xeokit-unloadAllModels xeokit-btn disabled" data-tippy-content="Unload all models">Unload all</button>
+                    { this.props.enableEditModels ? 
+                      <button type="button" className="xeokit-addModel xeokit-btn disabled" data-tippy-content="Add model">Add</button> : ''
+                    }
+                  </div>
+                  <div className="xeokit-models" ></div>
+                  {/* <ModelsExplorer
+                    enableEditModels={this._enableAddModels}
+                  /> */}
+                </div>
+              </div>
+              <div className="xeokit-tab xeokit-objectsTab">
+                <a className="xeokit-tab-btn disabled" href="#">Objects</a>
+                <div className="xeokit-tab-content">
+                  <div className="xeokit-btn-group">
+                    <button type="button" className="xeokit-showAllObjects xeokit-btn disabled" data-tippy-content="Show all objects">Show all</button>
+                    <button type="button" className="xeokit-hideAllObjects xeokit-btn disabled" data-tippy-content="Hide all objects">Hide all</button>
+                  </div>
+                  <div className="xeokit-objects xeokit-tree-panel" ></div>
+                  {/* <ObjectsExplorer/> */}
+                </div>
+              </div>
+              <div className="xeokit-tab xeokit-classesTab">
+                <a className="xeokit-tab-btn disabled" href="#">Classes</a>
+                <div className="xeokit-tab-content">
+                  <div className="xeokit-btn-group">
+                    <button type="button" className="xeokit-showAllClasses xeokit-btn disabled" data-tippy-content="Show all classes">Show all</button>
+                    <button type="button" className="xeokit-hideAllClasses xeokit-btn disabled" data-tippy-content="Hide all classes">Hide all</button>
+                  </div>
+                  <div className="xeokit-classes xeokit-tree-panel" ></div>
+                  {/* <ClassesExplorer/> */}
+                </div>
+              </div>
+              <div className="xeokit-tab xeokit-storeysTab">
+                <a className="xeokit-tab-btn disabled" href="#">Storeys</a>
+                <div className="xeokit-tab-content">
+                  <div className="xeokit-btn-group">
+                    <button type="button" className="xeokit-showAllStoreys xeokit-btn disabled" data-tippy-content="Show all storeys">Show all</button>
+                    <button type="button" className="xeokit-hideAllStoreys xeokit-btn disabled" data-tippy-content="Hide all storeys">Hide all</button>
+                  </div>
+                  <div className="xeokit-storeys xeokit-tree-panel"></div>
+                  {/* <StoreysExplorer/> */}
+                </div>
+              </div>
+            </div>
+          </div>
+          <div id="myContent">
+            <div id="myToolbar" ref={this.toolbarElementRef}>
+              <div className="xeokit-toolbar">
+                {/* Reset button */}
+                <div className="xeokit-btn-group">
+                    <button type="button" className="xeokit-reset xeokit-btn fa fa-home fa-2x disabled" data-tippy-content="Reset view"></button>
+                </div>
+                <div className="xeokit-btn-group" role="group">
+                    {/* 3D Mode button */}
+                    <button type="button" className="xeokit-threeD xeokit-btn fa fa-cube fa-2x" data-tippy-content="Toggle 2D/3D"></button>
+                    {/* Perspective/Ortho Mode button */}
+                    <button type="button" className="xeokit-ortho xeokit-btn fa fa-th fa-2x" data-tippy-content="Toggle Perspective/Ortho"></button>
+                    {/* Fit button */}
+                    <button type="button" className="xeokit-fit xeokit-btn fa fa-crop fa-2x disabled" data-tippy-content="View fit"></button>   
+                    {/* First Person mode button */}
+                    <button type="button" className="xeokit-firstPerson xeokit-btn fa fa-male fa-2x disabled" data-tippy-content="First person"></button>
+                </div>
+                {/* Tools button group */}
+                <div className="xeokit-btn-group" role="group">
+                    {/* Hide tool button */}
+                    <button type="button" className="xeokit-hide xeokit-btn fa fa-eraser fa-2x disabled" data-tippy-content="Hide objects"></button>
+                    {/* Select tool button */}
+                    <button type="button" className="xeokit-select xeokit-btn fa fa-mouse-pointer fa-2x disabled" data-tippy-content="Select objects"></button>
+                    {/* Query tool button */}
+                    <button type="button" className="xeokit-query xeokit-btn fa fa-info-circle fa-2x disabled" data-tippy-content="Query objects"></button>
+                    {/* section tool button */}
+                    <button type="button" className="xeokit-section xeokit-btn fa fa-cut fa-2x disabled" data-tippy-content="Slice objects">
+                      <div className="xeokit-section-menu-button">
+                        <span className="xeokit-arrow-down xeokit-section-menu-button-arrow"></span>
+                      </div>
+                      <div className="xeokit-section-counter" data-tippy-content="Number of existing slices"></div>
+                    </button>
+                </div>
+
+            </div>
+            </div>
+            <canvas id="myCanvas" ref={this.canvasElementRef}></canvas>
+          </div>
+        </div>
+        <canvas id="myNavCubeCanvas" ref={this.navCubeCanvasElementRef}></canvas>
+      </>
+    );
+  };
 }
 
-export { BIMViewer };
-
+export default withStyles(styles)(BIMViewer);

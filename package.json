@@ -37,6 +37,8 @@
   },
   "homepage": "https://github.com/matthu/xeokit-bim-viewer#readme",
   "devDependencies": {
+    "@material-ui/core": "^4.9.5",
+    "@types/material-ui": "^0.21.5",
     "autoprefixer": "^9.8.6",
     "babel-cli": "^6.26.0",
     "babel-loader": "^7.1.5",
