@@ -29,11 +29,11 @@ class ResetAction extends Controller {
         camera.look = [0,0,0];
         camera.up = [-1, 1, -1];
 
-        this.bimViewer._modelsExplorer.on("modelLoaded", (modelId: string) => {
+        this.bimViewer.on("modelLoaded", (modelId: string) => {
             this._saveModelMemento(modelId);
         });
 
-        this.bimViewer._modelsExplorer.on("modelUnloaded", (modelId: string) => {
+        this.bimViewer.on("modelUnloaded", (modelId: string) => {
             this._destroyModelMemento(modelId);
         });
 

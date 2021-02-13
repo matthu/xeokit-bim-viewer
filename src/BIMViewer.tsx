@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Theme, withStyles, WithStyles } from '@material-ui/core/styles';
+import { withStyles, WithStyles } from '@material-ui/core/styles';
 import { BCFViewpointsPlugin } from "@xeokit/xeokit-sdk/src/plugins/BCFViewpointsPlugin/BCFViewpointsPlugin.js";
 import { Entity } from "@xeokit/xeokit-sdk/src/viewer/scene/Entity.js";
 import { AmbientLight } from "@xeokit/xeokit-sdk/src/viewer/scene/lights/AmbientLight.js";
@@ -10,10 +10,13 @@ import { BusyModal } from "./BusyModal";
 import { CanvasContextMenu } from "./contextMenus/CanvasContextMenu";
 import { ObjectContextMenu } from "./contextMenus/ObjectContextMenu";
 import { Controller } from "./Controller";
-import { ClassesExplorer } from "./explorer/ClassesExplorer";
-import { ModelsExplorer } from "./explorer/ModelsExplorer";
-import { ObjectsExplorer } from "./explorer/ObjectsExplorer";
-import { StoreysExplorer } from "./explorer/StoreysExplorer";
+import ClassesExplorerComponent, { ClassesExplorer } from "./explorer/ClassesExplorer";
+import ModelsExplorerComponent, { ModelsExplorer } from "./explorer/ModelsExplorer";
+import ObjectsExplorerComponent, { ObjectsExplorer } from "./explorer/ObjectsExplorer";
+import StoreysExplorerComponent, { StoreysExplorer } from "./explorer/StoreysExplorer";
+import { ModelIFCObjectColors } from "./IFCObjectDefaults/ModelIFCObjectColors";
+import { ViewerIFCObjectColors } from "./IFCObjectDefaults/ViewerIFCObjectColors";
+import { XKTLoaderPlugin } from "@xeokit/xeokit-sdk/src/plugins/XKTLoaderPlugin/XKTLoaderPlugin.js";
 import { Server } from "./server/Server";
 import { FirstPersonMode } from "./toolbar/FirstPersonMode";
 import { FitAction } from "./toolbar/FitAction";
@@ -27,45 +30,47 @@ import { SelectionTool } from "./toolbar/SelectionTool";
 import { ThreeDMode } from "./toolbar/ThreeDMode";
 import { Map } from '@xeokit/xeokit-sdk/src/viewer/scene/utils/Map.js';
 
-function initTabs(containerElement: Element) {
+const tempVec3 = math.vec3();
 
-    const tabsClass = 'xeokit-tabs';
-    const tabClass = 'xeokit-tab';
-    const tabButtonClass = 'xeokit-tab-btn';
-    const activeClass = 'active';
+// function initTabs(containerElement: Element) {
 
-    // Activates the chosen tab and deactivates the rest
-    function activateTab(chosenTabElement: Element) {
-        let tabList = chosenTabElement.parentNode.querySelectorAll('.' + tabClass);
-        for (let i = 0; i < tabList.length; i++) {
-            let tabElement = tabList[i];
-            if (tabElement.isEqualNode(chosenTabElement)) {
-                tabElement.classList.add(activeClass)
-            } else {
-                tabElement.classList.remove(activeClass)
-            }
-        }
-    }
+//     const tabsClass = 'xeokit-tabs';
+//     const tabClass = 'xeokit-tab';
+//     const tabButtonClass = 'xeokit-tab-btn';
+//     const activeClass = 'active';
 
-    // Initialize each tabbed container
-    let tabbedContainers = containerElement.querySelectorAll('.' + tabsClass);
-    for (let i = 0; i < tabbedContainers.length; i++) {
-        let tabbedContainer = tabbedContainers[i];
-        let tabList = tabbedContainer.querySelectorAll('.' + tabClass);
-        activateTab(tabList[0]);
-        for (let i = 0; i < tabList.length; i++) {
-            let tabElement = tabList[i];
-            let tabButton = tabElement.querySelector('.' + tabButtonClass);
-            tabButton.addEventListener('click', function (event) {
-                event.preventDefault();
-                if (this.classList.contains("disabled")) {
-                    return;
-                }
-                activateTab((event.target as Element).parentNode as Element);
-            })
-        }
-    }
-}
+//     // Activates the chosen tab and deactivates the rest
+//     function activateTab(chosenTabElement: Element) {
+//         let tabList = chosenTabElement.parentNode.querySelectorAll('.' + tabClass);
+//         for (let i = 0; i < tabList.length; i++) {
+//             let tabElement = tabList[i];
+//             if (tabElement.isEqualNode(chosenTabElement)) {
+//                 tabElement.classList.add(activeClass)
+//             } else {
+//                 tabElement.classList.remove(activeClass)
+//             }
+//         }
+//     }
+
+//     // Initialize each tabbed container
+//     let tabbedContainers = containerElement.querySelectorAll('.' + tabsClass);
+//     for (let i = 0; i < tabbedContainers.length; i++) {
+//         let tabbedContainer = tabbedContainers[i];
+//         let tabList = tabbedContainer.querySelectorAll('.' + tabClass);
+//         activateTab(tabList[0]);
+//         for (let i = 0; i < tabList.length; i++) {
+//             let tabElement = tabList[i];
+//             let tabButton = tabElement.querySelector('.' + tabButtonClass);
+//             tabButton.addEventListener('click', function (event) {
+//                 event.preventDefault();
+//                 if (this.classList.contains("disabled")) {
+//                     return;
+//                 }
+//                 activateTab((event.target as Element).parentNode as Element);
+//             })
+//         }
+//     }
+// }
 
 export interface BIMConfig {
     canvasElement?: any;
@@ -86,17 +91,19 @@ export interface ViewerInfo {
   id: string;
   name: string;
   models: ViewerInfoModel[];
-  viewerConfigs: {
-    cameraNear: string;
-    cameraFar: string;
-    saoEnabled: string;
-    saoBias: string;
-    saoIntensity: string;
-    saoScale: string;
-    saoKernelRadius: string;
-  };
+  viewerConfigs: ViewerConfig;
   viewerContent: ViewerContent;
   viewerState: ViewerState;
+}
+
+export interface ViewerConfig {
+  cameraNear: string;
+  cameraFar: string;
+  saoEnabled: string;
+  saoBias: string;
+  saoIntensity: string;
+  saoScale: string;
+  saoKernelRadius: string;
 }
 
 export interface ViewerState {
@@ -139,6 +146,7 @@ const styles = () => ({
 interface Props extends BIMConfig, WithStyles<typeof styles> {
   ref: any;
   server: any;
+  defaultTab: "models" | "objects" | "classes" | "storeys";
 }
 
 /**
@@ -147,6 +155,10 @@ interface Props extends BIMConfig, WithStyles<typeof styles> {
  *
  */
 export class BIMViewer extends React.Component<Props> {
+    state: {
+      activeTab: "models" | "objects" | "classes" | "storeys";
+    }
+
     cfg: BIMConfig;
 
     bimViewer: BIMViewer;
@@ -155,7 +167,7 @@ export class BIMViewer extends React.Component<Props> {
 
     _configs: any;
     _enableAddModels: boolean;
-    _explorerElement: any;
+    // _explorerElement: any;
     _busyModal: BusyModal;
     _bcfViewpointsPlugin: BCFViewpointsPlugin;
     _canvasContextMenu: CanvasContextMenu;
@@ -191,11 +203,19 @@ export class BIMViewer extends React.Component<Props> {
     _active: boolean;
     _destroyed: boolean;
 
-    canvasElementRef: React.RefObject<any>;
-    explorerElementRef: React.RefObject<any>;
-    toolbarElementRef: React.RefObject<any>;
-    navCubeCanvasElementRef: React.RefObject<any>;
-    busyModelBackdropElementRef: React.RefObject<any>;
+    // Model properties
+    _modelsInfo: any;
+    _numModels: number;
+    _numModelsLoaded: number;
+    _projectId: string;
+    _xktLoader: XKTLoaderPlugin;
+
+    canvasElementRef: React.RefObject<HTMLCanvasElement>;
+    explorerElementRef: React.RefObject<HTMLDivElement>;
+    modelsExplorerRef: React.RefObject<HTMLDivElement>;
+    toolbarElementRef: React.RefObject<HTMLDivElement>;
+    navCubeCanvasElementRef: React.RefObject<HTMLCanvasElement>;
+    busyModelBackdropElementRef: React.RefObject<HTMLDivElement>;
 
     /**
      * Constructs a BIMViewer.
@@ -227,6 +247,7 @@ export class BIMViewer extends React.Component<Props> {
 
         this.canvasElementRef = React.createRef();
         this.explorerElementRef = React.createRef();
+        this.modelsExplorerRef = React.createRef();
         this.toolbarElementRef = React.createRef();
         this.navCubeCanvasElementRef = React.createRef();
         this.busyModelBackdropElementRef = React.createRef();
@@ -249,6 +270,15 @@ export class BIMViewer extends React.Component<Props> {
 
         this._configs = {};
         this._enableAddModels = !!props.enableEditModels;
+
+        this._modelsInfo = {};
+        this._numModels = 0;
+        this._numModelsLoaded = 0;
+        this._projectId = null;
+
+        this.state = {
+          activeTab: props.defaultTab,
+        };
     }
 
     public componentDidMount() {
@@ -262,6 +292,10 @@ export class BIMViewer extends React.Component<Props> {
         this.viewer = new Viewer({
             canvasElement: canvasElement,
             transparent: true
+        });
+
+        this._xktLoader = new XKTLoaderPlugin(this.viewer, {
+            objectDefaults: ModelIFCObjectColors
         });
 
         explorerElement.oncontextmenu = (e: Event) => {
@@ -284,42 +318,39 @@ export class BIMViewer extends React.Component<Props> {
         this._initCanvasContextMenus();
         this._initConfigs();
 
-        // explorerElement.innerHTML = createExplorerTemplate(props);
-        // toolbarElement.innerHTML = toolbarTemplate;
+        // this._explorerElement = explorerElement;
 
-        this._explorerElement = explorerElement;
+        // initTabs(explorerElement);
 
-        initTabs(explorerElement);
+        // this._modelsExplorer = new ModelsExplorer(this, {
+        //     modelsTabElement: explorerElement.querySelector(".xeokit-modelsTab"),
+        //     loadModelsButtonElement: explorerElement.querySelector(".xeokit-loadAllModels"), // Can be undefined
+        //     unloadModelsButtonElement: explorerElement.querySelector(".xeokit-unloadAllModels"),
+        //     addModelButtonElement: explorerElement.querySelector(".xeokit-addModel"), // Can be undefined
+        //     modelsElement: explorerElement.querySelector(".xeokit-models"),
+        //     enableEditModels: this._enableAddModels
+        // });
 
-        this._modelsExplorer = new ModelsExplorer(this, {
-            modelsTabElement: explorerElement.querySelector(".xeokit-modelsTab"),
-            loadModelsButtonElement: explorerElement.querySelector(".xeokit-loadAllModels"), // Can be undefined
-            unloadModelsButtonElement: explorerElement.querySelector(".xeokit-unloadAllModels"),
-            addModelButtonElement: explorerElement.querySelector(".xeokit-addModel"), // Can be undefined
-            modelsElement: explorerElement.querySelector(".xeokit-models"),
-            enableEditModels: this._enableAddModels
-        });
+        // this._objectsExplorer = new ObjectsExplorer(this, {
+        //     objectsTabElement: explorerElement.querySelector(".xeokit-objectsTab"),
+        //     showAllObjectsButtonElement: explorerElement.querySelector(".xeokit-showAllObjects"),
+        //     hideAllObjectsButtonElement: explorerElement.querySelector(".xeokit-hideAllObjects"),
+        //     objectsElement: explorerElement.querySelector(".xeokit-objects")
+        // });
 
-        this._objectsExplorer = new ObjectsExplorer(this, {
-            objectsTabElement: explorerElement.querySelector(".xeokit-objectsTab"),
-            showAllObjectsButtonElement: explorerElement.querySelector(".xeokit-showAllObjects"),
-            hideAllObjectsButtonElement: explorerElement.querySelector(".xeokit-hideAllObjects"),
-            objectsElement: explorerElement.querySelector(".xeokit-objects")
-        });
+        // this._classesExplorer = new ClassesExplorer(this, {
+        //     classesTabElement: explorerElement.querySelector(".xeokit-classesTab"),
+        //     showAllClassesButtonElement: explorerElement.querySelector(".xeokit-showAllClasses"),
+        //     hideAllClassesButtonElement: explorerElement.querySelector(".xeokit-hideAllClasses"),
+        //     classesElement: explorerElement.querySelector(".xeokit-classes")
+        // });
 
-        this._classesExplorer = new ClassesExplorer(this, {
-            classesTabElement: explorerElement.querySelector(".xeokit-classesTab"),
-            showAllClassesButtonElement: explorerElement.querySelector(".xeokit-showAllClasses"),
-            hideAllClassesButtonElement: explorerElement.querySelector(".xeokit-hideAllClasses"),
-            classesElement: explorerElement.querySelector(".xeokit-classes")
-        });
-
-        this._storeysExplorer = new StoreysExplorer(this, {
-            storeysTabElement: explorerElement.querySelector(".xeokit-storeysTab"),
-            showAllStoreysButtonElement: explorerElement.querySelector(".xeokit-showAllStoreys"),
-            hideAllStoreysButtonElement: explorerElement.querySelector(".xeokit-hideAllStoreys"),
-            storeysElement: explorerElement.querySelector(".xeokit-storeys")
-        });
+        // this._storeysExplorer = new StoreysExplorer(this, {
+        //     storeysTabElement: explorerElement.querySelector(".xeokit-storeysTab"),
+        //     showAllStoreysButtonElement: explorerElement.querySelector(".xeokit-showAllStoreys"),
+        //     hideAllStoreysButtonElement: explorerElement.querySelector(".xeokit-hideAllStoreys"),
+        //     storeysElement: explorerElement.querySelector(".xeokit-storeys")
+        // });
 
         this._resetAction = new ResetAction(this, {
             buttonElement: toolbarElement.querySelector(".xeokit-reset"),
@@ -413,20 +444,20 @@ export class BIMViewer extends React.Component<Props> {
         this._firstPersonMode.setActive(false);
         this._navCubeMode.setActive(true);
 
-        this._modelsExplorer.on("modelLoaded", (modelId: string) => {
-            if (this._modelsExplorer.getNumModelsLoaded() > 0) {
-                this.setControlsEnabled(true);
-            }
-            this.fire("modelLoaded", modelId);
-        });
+        // this._modelsExplorer.on("modelLoaded", (modelId: string) => {
+        //     if (this._modelsExplorer.getNumModelsLoaded() > 0) {
+        //         this.setControlsEnabled(true);
+        //     }
+        //     this.fire("modelLoaded", modelId);
+        // });
 
-        this._modelsExplorer.on("modelUnloaded", (modelId: string) => {
-            if (this._modelsExplorer.getNumModelsLoaded() === 0) {
-                this.setControlsEnabled(false);
-                this.openTab("models");
-            }
-            this.fire("modelUnloaded", modelId);
-        });
+        // this._modelsExplorer.on("modelUnloaded", (modelId: string) => {
+        //     if (this._modelsExplorer.getNumModelsLoaded() === 0) {
+        //         this.setControlsEnabled(false);
+        //         this.openTab("models");
+        //     }
+        //     this.fire("modelUnloaded", modelId);
+        // });
 
         this._queryTool.on("queryPicked", (event: any) => {
             this.fire("queryPicked", event);
@@ -442,59 +473,75 @@ export class BIMViewer extends React.Component<Props> {
 
         this._mutexActivation([this._queryTool, this._hideTool, this._selectionTool, this._sectionTool]);
 
-        explorerElement.querySelector(".xeokit-showAllObjects").addEventListener("click", (event: Event) => {
-            this.setAllObjectsVisible(true);
-            this.setAllObjectsXRayed(false);
-            event.preventDefault();
-        });
+        // explorerElement.querySelector(".xeokit-loadAllModels").addEventListener("click", (event: Event) => {
+        //     this.setControlsEnabled(false); // For quick UI feedback
+        //     this.loadAllModels();
+        //     event.preventDefault();
+        // });
 
-        explorerElement.querySelector(".xeokit-hideAllObjects").addEventListener("click", (event: Event) => {
-            this.setAllObjectsVisible(false);
-            event.preventDefault();
-        });
+        // explorerElement.querySelector(".xeokit-unloadAllModels").addEventListener("click", (event: Event) => {
+        //     this.setControlsEnabled(false); // For quick UI feedback
+        //     this._modelsExplorer.unloadAllModels();
+        //     event.preventDefault();
+        // });
 
-        explorerElement.querySelector(".xeokit-showAllClasses").addEventListener("click", (event: Event) => {
-            this.setAllObjectsVisible(true);
-            this.setAllObjectsXRayed(false);
-            event.preventDefault();
-        });
-
-        explorerElement.querySelector(".xeokit-hideAllClasses").addEventListener("click", (event: Event) => {
-            this.setAllObjectsVisible(false);
-            event.preventDefault();
-        });
-
-        explorerElement.querySelector(".xeokit-showAllStoreys").addEventListener("click", (event: Event) => {
-            this.setAllObjectsVisible(true);
-            this.setAllObjectsXRayed(false);
-            event.preventDefault();
-        });
-
-        explorerElement.querySelector(".xeokit-hideAllStoreys").addEventListener("click", (event: Event) => {
-            this.setAllObjectsVisible(false);
-            event.preventDefault();
-        });
-
-        explorerElement.querySelector(".xeokit-loadAllModels").addEventListener("click", (event: Event) => {
-            this.setControlsEnabled(false); // For quick UI feedback
-            this.loadAllModels();
-            event.preventDefault();
-        });
-
-        explorerElement.querySelector(".xeokit-unloadAllModels").addEventListener("click", (event: Event) => {
-            this.setControlsEnabled(false); // For quick UI feedback
-            this._modelsExplorer.unloadAllModels();
-            event.preventDefault();
-        });
-
-        if (this._enableAddModels) {
-            explorerElement.querySelector(".xeokit-addModel").addEventListener("click", (event: Event) => {
-                this.fire("addModel", {});
-                event.preventDefault();
-            });
-        }
+        // if (this._enableAddModels) {
+        //     explorerElement.querySelector(".xeokit-addModel").addEventListener("click", (event: Event) => {
+        //         this.fire("addModel", {});
+        //         event.preventDefault();
+        //     });
+        // }
 
         this._bcfViewpointsPlugin = new BCFViewpointsPlugin(this.viewer, {});
+    }
+
+    handleShowAllObjects = (event: React.MouseEvent) => {
+        this.setAllObjectsVisible(true);
+        this.setAllObjectsXRayed(false);
+        event.preventDefault();
+    }
+
+    handleHideAllObjects = (event: React.MouseEvent) => {
+        this.setAllObjectsVisible(false);
+        event.preventDefault();
+    }
+
+    handleLoadAllModels = (event: React.MouseEvent) => {
+        this.setControlsEnabled(false); // For quick UI feedback
+        this.loadAllModels();
+        event.preventDefault();
+    }
+
+    handleUnloadAllModels = (event: React.MouseEvent) => {
+        this.setControlsEnabled(false); // For quick UI feedback
+        this.unloadAllModels();
+        event.preventDefault();
+    }
+
+    handleAddModel = (event: React.MouseEvent) => {
+        if (this._enableAddModels) {
+            this.fire("addModel", {});
+            event.preventDefault();
+        }
+    }
+
+    handleSetTab = (tab: "models" | "objects" | "classes" | "storeys") => {
+        this.setState({activeTab: tab});
+    }
+
+    modelsExplorerLoaded = (modelId: string) => {
+        if (this.getNumModelsLoaded() > 0) {
+            this.setControlsEnabled(true);
+        }
+        this.fire("modelLoaded", modelId);
+    }
+
+    modelsExplorerUnloaded = (modelId: string) => {
+        if (this.getNumModelsLoaded() === 0) {
+            this.setControlsEnabled(false);
+            this.setState({activeTab: "models"});
+        }
+        this.fire("modelUnloaded", modelId);
     }
 
     _customizeViewer() {
@@ -638,10 +685,10 @@ export class BIMViewer extends React.Component<Props> {
                     viewer: this.viewer,
                     bimViewer: this,
                     showObjectInExplorers: (objectId: any) => {
-                        const openTabId = this.getOpenTab();
+                        const openTabId = this.state.activeTab;
                         if (openTabId !== "objects" && openTabId !== "classes" && openTabId !== "storeys") {
                             // Scroll won't work if tab not open
-                            this.openTab("objects");
+                            this.setState({activeTab: "objects"});
                         }
                         this.showObjectInExplorers(objectId);
                     },
@@ -926,25 +973,60 @@ export class BIMViewer extends React.Component<Props> {
             this.error("loadProject() - Argument expected: objectId");
             return;
         }
-        this._modelsExplorer.loadProject(projectId,
-            () => {
-                if (done) {
-                    done();
-                }
-            }, (errorMsg: string) => {
-                this.error("loadProject() - " + errorMsg);
-                if (error) {
-                    error(errorMsg);
-                }
-            });
+        this.props.server.getProject(projectId, (projectInfo: ViewerInfo) => {
+            this.unloadProject();
+            this._projectId = projectId;
+            this._modelsInfo = {};
+            this._numModels = 0;
+            this.parseProject(projectInfo, done);
+            if (this._numModelsLoaded < this._numModels) {
+                this.setState({loadModelsEnabled: true});
+                // this._loadModelsButtonElement.classList.remove("disabled");
+            }
+            if (this._numModelsLoaded > 0) {
+                this.setState({unloadModelsEnabled: true});
+                // this._unloadModelsButtonElement.classList.remove("disabled");
+            }
+            if (this._enableAddModels) {
+                this.setState({addModelEnabled: true});
+                // this._addModelButtonElement.classList.remove("disabled");
+            }
+        }, (errMsg: string) => {
+            this.error(errMsg);
+            if (error) {
+                error(errMsg);
+            }
+        });
     }
 
     /**
      * Unloads whatever project is currently loaded.
      */
     unloadProject() {
-        this._modelsExplorer.unloadProject();
-        this.openTab("models");
+        if (!this._projectId) {
+            return;
+        }
+        const models = this.viewer.scene.models;
+        for (var modelId in models) {
+            if (models.hasOwnProperty(modelId)) {
+                const model = models[modelId];
+                model.destroy();
+            }
+        }
+        this._numModelsLoaded = 0;
+
+        this.setState({loadModelsEnabled: false, unloadModelsEnabled: false});
+        // this._loadModelsButtonElement.classList.add("disabled");
+        // this._unloadModelsButtonElement.classList.add("disabled");
+        if (this._enableAddModels) {
+            this.setState({addModelEnabled: false});
+            // this._addModelButtonElement.classList.add("disabled");
+        }
+        const lastProjectId = this._projectId;
+        this._projectId = null;
+        // this.projectUnloaded({projectId: lastProjectId});
+
+        this.setState({activeTab: "models"});
         this.setControlsEnabled(false); // For quick UI feedback
     }
 
@@ -954,7 +1036,7 @@ export class BIMViewer extends React.Component<Props> {
      * @returns {String} The ID of the currently loaded project, otherwise ````null```` if no project is currently loaded.
      */
     getLoadedProjectId(): string {
-        return this._modelsExplorer.getLoadedProjectId();
+        return this._projectId;
     }
 
     /**
@@ -963,7 +1045,7 @@ export class BIMViewer extends React.Component<Props> {
      * @returns {String[]} The IDs of the models in the currently loaded project.
      */
     getModelIds(): string[] {
-        return this._modelsExplorer.getModelIds();
+        return Object.keys(this._modelsInfo);
     }
 
     /**
@@ -980,17 +1062,90 @@ export class BIMViewer extends React.Component<Props> {
             this.error("loadModel() - Argument expected: modelId");
             return;
         }
-        this._modelsExplorer.loadModel(modelId,
-            () => {
-                if (done) {
-                    done();
-                }
-            }, (errorMsg: string) => {
-                this.error("loadModel() - " + errorMsg);
-                if (error) {
-                    error(errorMsg);
-                }
-            });
+        if (!this._projectId) {
+          const errMsg = "No project currently loaded";
+          this.error(errMsg);
+          if (error) {
+              error(errMsg);
+          }
+          return;
+      }
+      const modelInfo = this._modelsInfo[modelId];
+      if (!modelInfo) {
+          const errMsg = "Model not in currently loaded project";
+          this.error(errMsg);
+          if (error) {
+              error(errMsg);
+          }
+          return;
+      }
+      this._busyModal.show("Loading: " + modelInfo.name);
+      this.props.server.getMetadata(this._projectId, modelId,
+          (json: string) => {
+              this.props.server.getGeometry(this._projectId, modelId,
+                  (arraybuffer: string[]) => {
+                      const objectColorSource = (modelInfo.objectColorSource || this.getObjectColorSource());
+                      const objectDefaults = (objectColorSource === "model") ? ModelIFCObjectColors : ViewerIFCObjectColors;
+                      const model = this._xktLoader.load({
+                          id: modelId,
+                          metaModelData: json,
+                          xkt: arraybuffer,
+                          objectDefaults: objectDefaults,
+                          excludeUnclassifiedObjects: true,
+                          position: modelInfo.position,
+                          scale: modelInfo.scale,
+                          rotation: modelInfo.rotation,
+                          matrix: modelInfo.matrix,
+                          edges: (modelInfo.edges !== false),
+                          saoEnabled: modelInfo.saoEnabled
+                      });
+                      model.on("loaded", () => {
+                          // const checkbox = document.getElementById("" + modelId);
+                          // (checkbox as any).checked = true;
+                          const scene = this.viewer.scene;
+                          const aabb = scene.getAABB(scene.visibleObjectIds);
+                          this._numModelsLoaded++;
+                          this.setState({unloadModelsEnabled: true, loadModelsEnabled: (this._numModelsLoaded < this._numModels)});
+                          // // this._unloadModelsButtonElement.classList.remove("disabled");
+                          // if (this._numModelsLoaded < this._numModels) {
+                          //     this._loadModelsButtonElement.classList.remove("disabled");
+                          // } else {
+                          //     this._loadModelsButtonElement.classList.add("disabled");
+                          // }
+                          if (this._numModelsLoaded === 1) { // Jump camera to view-fit first model loaded
+                              this.viewer.cameraFlight.jumpTo({
+                                  aabb: aabb
+                              });
+                              this.viewer.cameraControl.pivotPos = math.getAABB3Center(aabb, tempVec3);
+                              this.modelsExplorerLoaded(modelId);
+                              this._busyModal.hide();
+                              if (done) {
+                                  done();
+                              }
+                          } else {
+                              this.modelsExplorerLoaded(modelId);
+                              this._busyModal.hide();
+                              if (done) {
+                                  done();
+                              }
+                          }
+                      });
+                  },
+                  (errMsg: string) => {
+                      this._busyModal.hide();
+                      this.error(errMsg);
+                      if (error) {
+                          error(errMsg);
+                      }
+                  });
+          },
+          (errMsg: string) => {
+              this._busyModal.hide();
+              this.error(errMsg);
+              if (error) {
+                  error(errMsg);
+              }
+          });
     }
 
     /**
@@ -1002,14 +1157,14 @@ export class BIMViewer extends React.Component<Props> {
      */
     loadAllModels(done = function () {
     }) {
-        const modelIds = this._modelsExplorer.getModelIds();
+        const modelIds = this.getModelIds();
         const loadNextModel = (i: number, done2: any) => {
             if (i >= modelIds.length) {
                 done2();
             } else {
                 const modelId: string = modelIds[i];
-                if (!this._modelsExplorer.isModelLoaded(modelId)) {
-                    this._modelsExplorer.loadModel(modelId, () => {
+                if (!this.isModelLoaded(modelId)) {
+                    this.loadModel(modelId, () => {
                         loadNextModel(i + 1, done2);
                     }, (errorMsg: string) => {
                         this.error("loadAllModels() - " + errorMsg);
@@ -1023,13 +1178,96 @@ export class BIMViewer extends React.Component<Props> {
         loadNextModel(0, done);
     }
 
+    parseProject(projectInfo: ViewerInfo, done: any) {
+        // this._buildModelsMenu(projectInfo);
+        const modelsInfo = projectInfo.models || [];
+        this._modelsInfo = {};
+        this._numModels = modelsInfo.length;
+        for (let i = 0, len = modelsInfo.length; i < len; i++) {
+            const modelInfo = modelsInfo[i];
+            this._modelsInfo[modelInfo.id] = modelInfo;
+        }
+
+        this.parseViewerConfigs(projectInfo);
+        this.parseViewerContent(projectInfo, () => {
+            this.parseViewerState(projectInfo, () => {
+                done();
+            });
+        });
+    }
+
+    
+
+    parseViewerConfigs(projectInfo: ViewerInfo) {
+        const viewerConfigs = projectInfo.viewerConfigs;
+        if (viewerConfigs) {
+            this.setConfigs(viewerConfigs);
+        }
+    }
+
+    parseViewerContent(projectInfo: ViewerInfo, done: any) {
+        const viewerContent = projectInfo.viewerContent;
+        if (!viewerContent) {
+            done();
+            return;
+        }
+        this.parseModelsLoaded(viewerContent, () => {
+            done();
+        });
+    }
+
+    parseModelsLoaded(viewerContent: ViewerContent, done: any) {
+        const modelsLoaded = viewerContent.modelsLoaded;
+        if (!modelsLoaded || (modelsLoaded.length === 0)) {
+            done();
+            return;
+        }
+        this.loadNextModel(modelsLoaded.slice(0), done);
+    }
+
+    loadNextModel(modelsLoaded: string[], done: any) {
+        if (modelsLoaded.length === 0) {
+            done();
+            return;
+        }
+        const modelId = modelsLoaded.pop();
+        this.loadModel(modelId,
+            () => { // Done
+                this.loadNextModel(modelsLoaded, done);
+            },
+            () => { // Error - recover and attempt to load next model
+                this.loadNextModel(modelsLoaded, done);
+            });
+    }
+
+    parseViewerState(projectInfo: ViewerInfo, done: any) {
+        const viewerState = projectInfo.viewerState;
+        if (!viewerState) {
+            done();
+            return;
+        }
+        this.setViewerState(viewerState, done);
+    }
+
+    getNumModelsLoaded() {
+        return this._numModelsLoaded;
+    }
+
+    getModelsInfo() {
+        return this._modelsInfo;
+    }
+
+    getModelInfo(modelId: string) {
+        return this._modelsInfo[modelId];
+    }
+
     /**
      * Returns the IDs of the currently loaded models, if any.
      *
      * @returns {String[]} The IDs of the currently loaded models, otherwise an empty array if no models are currently loaded.
      */
     getLoadedModelIds() {
-        return this._modelsExplorer._getLoadedModelIds();
+        return Object.keys(this.viewer.scene.models);
     }
 
     /**
@@ -1043,7 +1281,7 @@ export class BIMViewer extends React.Component<Props> {
             this.error("unloadModel() - Argument expected: modelId");
             return;
         }
-        return this._modelsExplorer.isModelLoaded(modelId);
+        return (!!this.viewer.scene.models[modelId]);
     }
 
     /**
@@ -1058,14 +1296,43 @@ export class BIMViewer extends React.Component<Props> {
             this.error("unloadModel() - Argument expected: modelId");
             return;
         }
-        this._modelsExplorer.unloadModel(modelId);
+        const model = this.viewer.scene.models[modelId];
+        if (!model) {
+            this.error("Model not loaded: " + modelId);
+            return;
+        }
+        model.destroy();
+        // const checkbox = document.getElementById("" + modelId);
+        // (checkbox as any).checked = false;
+        // const span = document.getElementById("span-" + modelId);
+        this._numModelsLoaded--;
+        this.setState({
+          unloadModelsEnabled: (this._numModelsLoaded > 0),
+          loadModelsEnabled: (this._numModelsLoaded < this._numModels)
+        })
+        // if (this._numModelsLoaded > 0) {
+        //     this._unloadModelsButtonElement.classList.remove("disabled");
+        // } else {
+        //     this._unloadModelsButtonElement.classList.add("disabled");
+        // }
+        // if (this._numModelsLoaded < this._numModels) {
+        //     this._loadModelsButtonElement.classList.remove("disabled");
+        // } else {
+        //     this._loadModelsButtonElement.classList.add("disabled");
+        // }
+        this.modelsExplorerUnloaded(modelId);
     }
 
     /**
      * Unloads all currently loaded models.
      */
     unloadAllModels() {
-        this._modelsExplorer.unloadAllModels();
+        const models = this.viewer.scene.models;
+        const modelIds = Object.keys(models);
+        for (var i = 0, len = modelIds.length; i < len; i++) {
+            const modelId = modelIds[i];
+            this.unloadModel(modelId);
+        }
     }
 
     /**
@@ -1144,7 +1411,7 @@ export class BIMViewer extends React.Component<Props> {
      *
      * @return {String} Where colors will be loaded from - "model" to get colors from the model, or "viewer" to get them from the viewer's built-in table of colors for IFC types.
      */
-    getObjectColorSource() {
+    getObjectColorSource(): string {
         return this._objectColorSource || "model";
     }
 
@@ -1163,8 +1430,8 @@ export class BIMViewer extends React.Component<Props> {
      */
     setViewerState(viewerState: ViewerState, done = () => {
     }) {
-        if (viewerState.tabOpen) {
-            this.openTab(viewerState.tabOpen);
+        if (viewerState.tabOpen && !this.state.activeTab) {
+            this.setState({activeTab: viewerState.tabOpen});
         }
         if (viewerState.expandObjectsTree) {
             this._objectsExplorer.expandTreeViewToDepth(viewerState.expandObjectsTree);
@@ -1528,94 +1795,6 @@ export class BIMViewer extends React.Component<Props> {
     }
 
     /**
-     * Opens the specified viewer tab.
-     *
-     * The available tabs are:
-     *
-     *  * "models" - the Models tab, which lists the models available within the currently loaded project,
-     *  * "objects" - the Objects tab, which contains a tree view for each loaded model, organized to indicate the containment hierarchy of their objects,
-     *  * "classes" - the Classes tab, which contains a tree view for each loaded model, with nodes grouped by IFC types of their objects, and
-     *  * "storeys" - the Storeys tab, which contains a tree view for each loaded model, with nodes grouped within ````IfcBuildingStoreys````, sub-grouped by their IFC types.
-     *
-     * @param {String} tabId ID of the tab to open - see method description.
-     */
-    openTab(tabId: string) {
-        if (!tabId) {
-            this.error("openTab() - Argument expected: tabId");
-            return;
-        }
-        const tabClass = 'xeokit-tab';
-        const activeClass = 'active';
-        let tabSelector;
-        switch (tabId) {
-            case "models":
-                tabSelector = "xeokit-modelsTab";
-                break;
-            case "objects":
-                tabSelector = "xeokit-objectsTab";
-                break;
-            case "classes":
-                tabSelector = "xeokit-classesTab";
-                break;
-            case "storeys":
-                tabSelector = "xeokit-storeysTab";
-                break;
-            default:
-                this.error("openTab() - tab not recognized: '" + tabId + "'");
-                return;
-        }
-        let tabs = this._explorerElement.querySelectorAll("." + tabClass);
-        let tab = this._explorerElement.querySelector("." + tabSelector);
-        for (let i = 0; i < tabs.length; i++) {
-            let tabElement = tabs[i];
-            if (tabElement.isEqualNode(tab)) {
-                tabElement.classList.add(activeClass)
-            } else {
-                tabElement.classList.remove(activeClass)
-            }
-        }
-    }
-
-    /**
-     * Returns the ID of the currently open viewer tab.
-     *
-     * The available tabs are:
-     *
-     *  * "models" - the Models tab, which lists the models available within the currently loaded project,
-     *  * "objects" - the Objects tab, which contains a tree view for each loaded model, organized to indicate the containment hierarchy of their objects,
-     *  * "classes" - the Classes tab, which contains a tree view for each loaded model, with nodes grouped by IFC types of their objects, and
-     *  * "storeys" - the Storeys tab, which contains a tree view for each loaded model, with nodes grouped within ````IfcBuildingStoreys````, sub-grouped by their IFC types.
-     *  * "none" - no tab is open; this is unlikely, since one of the above tabs should be open at a any time, but here for robustness.
-     */
-    getOpenTab() {
-        function hasClass(element: any, className: string) {
-            if (!element) {
-                return false;
-            }
-            return (" " + element.className + " ").indexOf(" " + className + " ") > -1;
-        }
-
-        const activeClass = 'active';
-        let modelsTab = this._explorerElement.querySelector(".xeokit-modelsTab");
-        if (hasClass(modelsTab, activeClass)) {
-            return "models";
-        }
-        let objectsTab = this._explorerElement.querySelector(".xeokit-objectsTab");
-        if (hasClass(objectsTab, activeClass)) {
-            return "objects";
-        }
-        let classesTab = this._explorerElement.querySelector(".xeokit-classesTab");
-        if (hasClass(classesTab, activeClass)) {
-            return "classes";
-        }
-        let storeysTab = this._explorerElement.querySelector(".xeokit-storeysTab");
-        if (hasClass(storeysTab, activeClass)) {
-            return "storeys";
-        }
-        return "none";
-    }
-
-    /**
      * Switches the viewer between 2D and 3D viewing modes.
      *
      * @param {Boolean} enabled Set true to switch into 3D mode, else false to switch into 2D mode.
@@ -1817,9 +1996,15 @@ export class BIMViewer extends React.Component<Props> {
         // Explorer
 
         // Models tab is always enabled
-        this._objectsExplorer.setEnabled(enabled);
-        this._classesExplorer.setEnabled(enabled);
-        this._storeysExplorer.setEnabled(enabled);
+        if (this._objectsExplorer) {
+          this._objectsExplorer.setEnabled(enabled);
+        }
+        if (this._classesExplorer) {
+          this._classesExplorer.setEnabled(enabled);
+        }
+        if (this._storeysExplorer) {
+          this._storeysExplorer.setEnabled(enabled);
+        }
 
         // Toolbar
 
@@ -2151,6 +2336,7 @@ export class BIMViewer extends React.Component<Props> {
        */
       this.viewer.destroy();
       this._bcfViewpointsPlugin.destroy();
+      this._xktLoader.destroy();
       this._canvasContextMenu.destroy();
       this._objectContextMenu.destroy();
       this.fire("destroyed", this._destroyed = true);
@@ -2171,55 +2357,68 @@ export class BIMViewer extends React.Component<Props> {
         <div id="myViewer" className="xeokit-busy-modal-backdrop" ref={this.busyModelBackdropElementRef}>
           <div id="myExplorer" className="active" ref={this.explorerElementRef}>
             <div className="xeokit-tabs">
-              <div className="xeokit-tab xeokit-modelsTab">
-                <a className="xeokit-tab-btn" href="#">Models</a>
-                <div className="xeokit-tab-content">
-                  <div className="xeokit-btn-group">
-                    <button type="button" className="xeokit-loadAllModels xeokit-btn disabled" data-tippy-content="Load all models">Load all</button>
-                    <button type="button" className="xeokit-unloadAllModels xeokit-btn disabled" data-tippy-content="Unload all models">Unload all</button>
-                    { this.props.enableEditModels ? 
-                      <button type="button" className="xeokit-addModel xeokit-btn disabled" data-tippy-content="Add model">Add</button> : ''
-                    }
-                  </div>
-                  <div className="xeokit-models" ></div>
-                  {/* <ModelsExplorer
+              { this.viewer != null &&
+                <>
+                  <ModelsExplorerComponent
+                    modelsInfo={this._modelsInfo}
+                    activeTab={this.state.activeTab === "models"}
+                    bimViewer={this}
+                    viewer={this.viewer}
+                    server={this.server}
+                    numModelsLoaded={this._numModelsLoaded}
                     enableEditModels={this._enableAddModels}
-                  /> */}
-                </div>
-              </div>
-              <div className="xeokit-tab xeokit-objectsTab">
-                <a className="xeokit-tab-btn disabled" href="#">Objects</a>
-                <div className="xeokit-tab-content">
-                  <div className="xeokit-btn-group">
-                    <button type="button" className="xeokit-showAllObjects xeokit-btn disabled" data-tippy-content="Show all objects">Show all</button>
-                    <button type="button" className="xeokit-hideAllObjects xeokit-btn disabled" data-tippy-content="Hide all objects">Hide all</button>
-                  </div>
-                  <div className="xeokit-objects xeokit-tree-panel" ></div>
-                  {/* <ObjectsExplorer/> */}
-                </div>
-              </div>
-              <div className="xeokit-tab xeokit-classesTab">
-                <a className="xeokit-tab-btn disabled" href="#">Classes</a>
-                <div className="xeokit-tab-content">
-                  <div className="xeokit-btn-group">
-                    <button type="button" className="xeokit-showAllClasses xeokit-btn disabled" data-tippy-content="Show all classes">Show all</button>
-                    <button type="button" className="xeokit-hideAllClasses xeokit-btn disabled" data-tippy-content="Hide all classes">Hide all</button>
-                  </div>
-                  <div className="xeokit-classes xeokit-tree-panel" ></div>
-                  {/* <ClassesExplorer/> */}
-                </div>
-              </div>
-              <div className="xeokit-tab xeokit-storeysTab">
-                <a className="xeokit-tab-btn disabled" href="#">Storeys</a>
-                <div className="xeokit-tab-content">
-                  <div className="xeokit-btn-group">
-                    <button type="button" className="xeokit-showAllStoreys xeokit-btn disabled" data-tippy-content="Show all storeys">Show all</button>
-                    <button type="button" className="xeokit-hideAllStoreys xeokit-btn disabled" data-tippy-content="Hide all storeys">Hide all</button>
-                  </div>
-                  <div className="xeokit-storeys xeokit-tree-panel"></div>
-                  {/* <StoreysExplorer/> */}
-                </div>
-              </div>
+                    ref={this.modelsExplorerRef}
+                    loadModel={this.loadModel}
+                    unloadModel={this.unloadModel}
+                    modelLoaded={this.modelsExplorerLoaded}
+                    modelUnloaded={this.modelsExplorerUnloaded}
+                    projectUnloaded={() => {}}
+                    busyModelShow={message => {this._busyModal.show(message)}}
+                    busyModelHide={() => {this._busyModal.hide()}}
+                    error={this.error}
+                    setConfigs={config => {this.setConfigs(config)}}
+                    setViewerState={(state, done) => {this.setViewerState(state, done)}}
+                    destroy={() => {this.destroy()}}
+                    loadAll={this.handleLoadAllModels}
+                    unloadAll={this.handleUnloadAllModels}
+                    addModel={this.handleAddModel}
+                    setActiveTab={() => this.handleSetTab("models")}
+                  />
+                  <ObjectsExplorerComponent
+                    activeTab={this.state.activeTab === "objects"}
+                    bimViewer={this}
+                    viewer={this.viewer}
+                    ref={this.modelsExplorerRef}
+                    error={this.error}
+                    destroy={() => {this.destroy()}}
+                    showAll={this.handleShowAllObjects}
+                    hideAll={this.handleHideAllObjects}
+                    setActiveTab={() => this.handleSetTab("objects")}
+                  />
+                  <ClassesExplorerComponent
+                    activeTab={this.state.activeTab === "classes"}
+                    bimViewer={this}
+                    viewer={this.viewer}
+                    ref={this.modelsExplorerRef}
+                    error={this.error}
+                    destroy={() => {this.destroy()}}
+                    showAll={this.handleShowAllObjects}
+                    hideAll={this.handleHideAllObjects}
+                    setActiveTab={() => this.handleSetTab("classes")}
+                  />
+                  <StoreysExplorerComponent
+                    activeTab={this.state.activeTab === "storeys"}
+                    bimViewer={this}
+                    viewer={this.viewer}
+                    ref={this.modelsExplorerRef}
+                    error={this.error}
+                    destroy={() => {this.destroy()}}
+                    showAll={this.handleShowAllObjects}
+                    hideAll={this.handleHideAllObjects}
+                    setActiveTab={() => this.handleSetTab("storeys")}
+                  />
+                </>
+              }
             </div>
           </div>
           <div id="myContent">

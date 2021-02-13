@@ -23,25 +23,6 @@ interface HashParameters {
   objectIds: string;
 }
 
-// Set up application
-const requestParams = getRequestParams() as RequestParameters;
-
-function getRequestParams(): RequestParameters {
-  var vars: {[id: string]: string} = {};
-  window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, (m: any, key: any, value: any) => {
-      vars[key] = value;
-      return value;
-  });
-  return vars as any;
-}
-
-// Project to load into the viewer
-const projectId = requestParams.projectId;
-if (!projectId) {
-    // return;
-}
-
-const enableEditModels = (requestParams.enableEditModels === "true");
 
 // Server client will load data from the file systems
 const server = new Server({
@@ -84,10 +65,31 @@ tippy('[data-tippy-content]', {
 
 class App extends React.Component {
   bimViewer: React.RefObject<BIMViewer>;
+  requestParams: RequestParameters;
+  enableEditModels: boolean;
+  projectId: string;
+  defaultTab: "models" | "objects" | "classes" | "storeys";
 
   constructor(props: any) {
     super(props);
     this.bimViewer = React.createRef();
+
+    // Set up application
+    this.requestParams = this.getRequestParams() as RequestParameters;
+
+    // Project to load into the viewer
+    this.projectId = this.requestParams.projectId;
+    if (!this.projectId) {
+        console.error("No project ID provided");
+        // return;
+    }
+
+    const tab = this.requestParams.tab;
+    if (tab) {
+        this.defaultTab = tab as "models" | "objects" | "classes" | "storeys";
+    }
+
+    this.enableEditModels = (this.requestParams.enableEditModels === "true");
   }
 
   public componentDidMount() {
@@ -106,7 +108,7 @@ class App extends React.Component {
     //--------------------------------------------------------------------------------------------------------------
 
     // Viewer configurations
-    const viewerConfigs = requestParams.configs;
+    const viewerConfigs = this.requestParams.configs;
     if (viewerConfigs) {
         const configNameVals = viewerConfigs.split(",");
         for (let i = 0, len = configNameVals.length; i < len; i++) {
@@ -119,7 +121,7 @@ class App extends React.Component {
     }
 
     // Load a project
-    this.bimViewer.current.loadProject(projectId, () => {
+    this.bimViewer.current.loadProject(this.projectId, () => {
 
       // The project may load one or models initially.
 
@@ -127,17 +129,11 @@ class App extends React.Component {
       //  - models to load
       // - explorer tab to open
 
-      const modelId = requestParams.modelId;
+      const modelId = this.requestParams.modelId;
       if (modelId) {
           this.bimViewer.current.loadModel(modelId);
       }
 
-      const tab = requestParams.tab;
-      if (tab) {
-          this.bimViewer.current.openTab(tab);
-      }
-
-      //
       window.setInterval((function () {
           var lastHash = "";
           return function () {
@@ -152,6 +148,15 @@ class App extends React.Component {
     (errorMsg: any) => {
       console.error(errorMsg);
     });
+  }
+
+  getRequestParams(): RequestParameters {
+    var vars: {[id: string]: string} = {};
+    window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, (m: any, key: any, value: any) => {
+        vars[key] = value;
+        return value;
+    });
+    return vars as any;
   }
 
   parseHashParams() {
@@ -206,7 +211,7 @@ class App extends React.Component {
                       console.error("Param expected for `openTab` action: 'tabId'");
                       break;
                   }
-                  this.bimViewer.current.openTab(tabId);
+                  this.defaultTab = tabId as "models" | "objects" | "classes" | "storeys";
                   break;
               default:
                   console.error("Action not supported: '" + action + "'");
@@ -233,8 +238,9 @@ class App extends React.Component {
   public render() {
     return (
       <BIMViewerComponent
+        defaultTab={this.defaultTab}
         server={server}
-        enableEditModels={enableEditModels}
+        enableEditModels={this.enableEditModels}
         ref={this.bimViewer}
       />
     );
