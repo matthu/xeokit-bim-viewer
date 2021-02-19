@@ -9,11 +9,6 @@ import { Controller } from "../Controller";
 import { Viewer } from '@xeokit/xeokit-sdk/src/viewer/Viewer.js';
 import { Server } from '../server/Server';
 
-const styles = () => ({
-  root: {
-  }
-});
-
 interface Props extends WithStyles<typeof styles> {
   ref: any;
   activeTab: boolean;
@@ -175,8 +170,9 @@ export class ModelsExplorer extends React.Component<Props> {
     }
 
     public render() {
+      const { classes } = this.props;
       return (
-        <div className={"xeokit-tab xeokit-modelsTab" + (this.props.activeTab ? " active" : "") + (this.state.tabEnabled ? "" : " disabled")} >
+        <div className={classes.modelsTab + " xeokit-tab" + (this.props.activeTab ? " active" : "") + (this.state.tabEnabled ? "" : " disabled")} >
           <a className="xeokit-tab-btn" onClick={this.handleSetActiveTab} href="#">Models</a>
           <div className="xeokit-tab-content">
             <div className="xeokit-btn-group">
@@ -192,5 +188,42 @@ export class ModelsExplorer extends React.Component<Props> {
       );
     }
 }
+
+const styles = () => ({
+  root: {
+  },
+  modelsTab: {
+    '& .xeokit-form-check': {
+      padding: '2px 0 2px 15px',
+      lineHeight: '3ex',
+    },
+    '& .xeokit-form-check input': {
+      verticalAlign: 'middle',
+    },
+    '& .xeokit-form-check span': {
+      display: 'inline-block',
+      color: '#ffff',
+      backgroundColor: '#03103F',
+      paddingLeft: '3px',
+      width: 'calc(100% - 30px)',
+      verticalAlign: 'middle',
+    },
+    '& .xeokit-form-check span.disabled': {
+      color: '#99A4AD',
+      backgroundColor: '#03103F',
+    },
+    '& .xeokit-form-check span:hover': {
+      color: '#ffffff',
+      cursor: 'pointer',
+      background: 'rgba(255, 255, 255, 0.2)',
+      paddingLeft: '3px',
+    },
+    '& .xeokit-form-check span.disabled:hover': {
+      color: '#99A4AD',
+      backgroundColor: '#03103F',
+      cursor: 'default',
+    }
+  }
+});
 
 export default withStyles(styles)(ModelsExplorer);

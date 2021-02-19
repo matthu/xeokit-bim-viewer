@@ -9,11 +9,6 @@ import { Viewer } from '@xeokit/xeokit-sdk/src/viewer/Viewer.js';
 
 const tempVec3 = math.vec3();
 
-const styles = () => ({
-  root: {
-  }
-});
-
 interface Props extends WithStyles<typeof styles> {
   ref: any;
   activeTab: boolean;
@@ -168,7 +163,7 @@ export class StoreysExplorer extends React.Component<Props> {
         // }
     }
 
-    expandTreeViewToDepth(depth: number) {
+    public expandTreeViewToDepth(depth: number) {
         this._treeView.expandToDepth(depth);
     }
 
@@ -251,8 +246,9 @@ export class StoreysExplorer extends React.Component<Props> {
     }
 
     public render() {
+      const { classes } = this.props;
       return (
-        <div className={"xeokit-tab xeokit-storeysTab" + (this.props.activeTab ? " active" : "") + (this.state.tabEnabled ? "" : " disabled")}>
+        <div className={classes.storeysTab + " xeokit-tab" + (this.props.activeTab ? " active" : "") + (this.state.tabEnabled ? "" : " disabled")}>
           <a className="xeokit-tab-btn" href="#" onClick={this.handleSetActiveTab}>Storeys</a>
           <div className="xeokit-tab-content">
             <div className="xeokit-btn-group">
@@ -265,5 +261,69 @@ export class StoreysExplorer extends React.Component<Props> {
       );
     }
 }
+
+const styles = () => ({
+  root: {
+  },
+  storeysTab: {
+    '& ul': {
+      listStyle: 'none',
+      paddingLeft: '1.75em',
+    },
+    '& ul li': {
+      margin: '2px 0',
+      position: 'relative',
+      lineHeight: '3ex',
+    },
+    '& ul li a': {
+      backgroundColor: '#eee',
+      borderRadius: '50%',
+      color: '#000',
+      display: 'inline-block',
+      height: '1.5em',
+      left: '-1.5em',
+      position: 'absolute',
+      textAlign: 'center',
+      textDecoration: 'none',
+      width: '1.5em',
+    },
+    'ul li a.plus': {
+      backgroundColor: '#ded',
+    },
+    '& ul li a.minus': {
+      backgroundColor: '#eee',
+    },
+    '& ul li a:active': {
+      top: '1px',
+    },
+    '& ul li input': {
+      verticalAlign: 'middle',
+    },
+    '& ul li span': {
+      display: 'inline-block',
+      paddingLeft: '2px',
+      verticalAlign: 'middle',
+    },
+    '& ul li span:hover': {
+      color: 'white',
+      cursor: 'pointer',
+      background: 'rgba(255, 255, 255, 0.2)',
+      paddingLeft: '2px',
+    },
+    '& .top-right': {
+      fontSize: 'small',
+      position: 'fixed',
+      right: '1em',
+      top: '1em',
+    },
+    '& .highlighted-node': { /* Appearance of node highlighted with BIMViewer#showObjectInExplorers() */
+      border: 'black solid 1px',
+      background: 'yellow',
+      color: 'black',
+      paddingLeft: '1px',
+      paddingRight: '5px',
+    }
+  }
+});
 
 export default withStyles(styles)(StoreysExplorer);
