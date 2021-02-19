@@ -24,68 +24,6 @@ body {
     overflow: hidden;
 }
 
-#myExplorer {
-    min-width: 400px;
-    max-width: 400px;
-    height: 100%;
-    margin-left: -400px;
-    background: #03103F;
-    color: #fff;
-    transition: all 0.3s;
-    padding: 0;
-    padding-left: 15px;
-    overflow-y: hidden;
-}
-
-#myExplorer.active {
-    margin-left: 0;
-}
-
-#myExplorer .explorer-toolbar {
-    padding: 0;
-    background: #03103F;
-}
-
-#myExplorer ul.components {
-    padding: 20px 0;
-    border-bottom: 1px solid #47748b;
-}
-
-#myExplorer ul p {
-    color: #CFCFCF;
-    padding: 10px;
-}
-
-#myExplorer ul li a {
-    padding: 0;
-    font-size: 14px;
-    display: block;
-}
-
-#myExplorer ul li a:hover {
-    color: #477dca;
-}
-
-#myExplorer ul li.active > a, a[aria-expanded="true"] {
-    color: #fff;
-    background: #03103F;
-}
-
-#myExplorer input[type="checkbox"] {
-    background-color: initial;
-    cursor: default;
-    -webkit-appearance: checkbox;
-    box-sizing: border-box;
-    margin: 3px 4px 3px 8px;
-    padding: initial;
-    border: initial;
-}
-
-#myContent {
-    width: calc(100% - 400px);
-    height: 100%;
-    background: #f2f2f2;
-}
 
 #myToolbar {
     top: 0;

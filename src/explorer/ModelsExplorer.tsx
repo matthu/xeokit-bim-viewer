@@ -25,14 +25,7 @@ interface Props extends WithStyles<typeof styles> {
   enableEditModels: boolean;
   loadModel(modelId: string): void;
   unloadModel(modelId: string): void;
-  modelLoaded(modelId: string): void;
-  modelUnloaded(modelId: string): void;
-  projectUnloaded(object: {projectId: string}): void;
-  busyModelShow(message: string): void;
-  busyModelHide(): void;
   error(errorMessage: string): void;
-  setConfigs(config: ViewerConfig): void;
-  setViewerState(state: ViewerState, done: any): void;
   destroy(): void;
   loadAll(event: React.MouseEvent): void;
   unloadAll(event: React.MouseEvent): void;

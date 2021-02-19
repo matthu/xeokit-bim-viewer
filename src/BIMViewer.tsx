@@ -29,6 +29,7 @@ import { SectionTool } from "./toolbar/SectionTool";
 import { SelectionTool } from "./toolbar/SelectionTool";
 import { ThreeDMode } from "./toolbar/ThreeDMode";
 import { Map } from '@xeokit/xeokit-sdk/src/viewer/scene/utils/Map.js';
+import SplitPane from 'react-split-pane';
 
 const tempVec3 = math.vec3();
 
@@ -137,11 +138,6 @@ export interface MetaData {
   parent: string;
   children: any[];
 }
-
-const styles = () => ({
-  root: {
-  }
-});
 
 interface Props extends BIMConfig, WithStyles<typeof styles> {
   ref: any;
@@ -2352,83 +2348,90 @@ export class BIMViewer extends React.Component<Props> {
   }
 
   public render() {
+    const { classes } = this.props;
     return (
       <>
         <div id="myViewer" className="xeokit-busy-modal-backdrop" ref={this.busyModelBackdropElementRef}>
-          <div id="myExplorer" className="active" ref={this.explorerElementRef}>
-            <div className="xeokit-tabs">
-              { this.viewer != null &&
-                <>
-                  <ModelsExplorerComponent
-                    modelsInfo={this._modelsInfo}
-                    activeTab={this.state.activeTab === "models"}
-                    bimViewer={this}
-                    viewer={this.viewer}
-                    server={this.server}
-                    numModelsLoaded={this._numModelsLoaded}
-                    enableEditModels={this._enableAddModels}
-                    ref={this.modelsExplorerRef}
-                    loadModel={this.loadModel}
-                    unloadModel={this.unloadModel}
-                    modelLoaded={this.modelsExplorerLoaded}
-                    modelUnloaded={this.modelsExplorerUnloaded}
-                    projectUnloaded={() => {}}
-                    busyModelShow={message => {this._busyModal.show(message)}}
-                    busyModelHide={() => {this._busyModal.hide()}}
-                    error={this.error}
-                    setConfigs={config => {this.setConfigs(config)}}
-                    setViewerState={(state, done) => {this.setViewerState(state, done)}}
-                    destroy={() => {this.destroy()}}
-                    loadAll={this.handleLoadAllModels}
-                    unloadAll={this.handleUnloadAllModels}
-                    addModel={this.handleAddModel}
-                    setActiveTab={() => this.handleSetTab("models")}
-                  />
-                  <ObjectsExplorerComponent
-                    activeTab={this.state.activeTab === "objects"}
-                    bimViewer={this}
-                    viewer={this.viewer}
-                    ref={this.modelsExplorerRef}
-                    error={this.error}
-                    destroy={() => {this.destroy()}}
-                    showAll={this.handleShowAllObjects}
-                    hideAll={this.handleHideAllObjects}
-                    setActiveTab={() => this.handleSetTab("objects")}
-                  />
-                  <ClassesExplorerComponent
-                    activeTab={this.state.activeTab === "classes"}
-                    bimViewer={this}
-                    viewer={this.viewer}
-                    ref={this.modelsExplorerRef}
-                    error={this.error}
-                    destroy={() => {this.destroy()}}
-                    showAll={this.handleShowAllObjects}
-                    hideAll={this.handleHideAllObjects}
-                    setActiveTab={() => this.handleSetTab("classes")}
-                  />
-                  <StoreysExplorerComponent
-                    activeTab={this.state.activeTab === "storeys"}
-                    bimViewer={this}
-                    viewer={this.viewer}
-                    ref={this.modelsExplorerRef}
-                    error={this.error}
-                    destroy={() => {this.destroy()}}
-                    showAll={this.handleShowAllObjects}
-                    hideAll={this.handleHideAllObjects}
-                    setActiveTab={() => this.handleSetTab("storeys")}
-                  />
-                </>
-              }
+          <SplitPane
+            className={classes.splitPane}
+            style={
+              {
+                position: 'relative' as 'relative',
+              } as React.CSSProperties
+            }
+            split="vertical"
+            primary="first"
+            minSize={400}
+            defaultSize={localStorage.getItem('splitPos') ? parseInt(localStorage.getItem('splitPos'), 10) : '20%'}
+            onChange={(size) => localStorage.setItem('splitPos', size.toString())}
+          >
+            <div id="myExplorer" className={classes.myExplorer} ref={this.explorerElementRef}>
+              <div className="xeokit-tabs">
+                { this.viewer != null &&
+                  <>
+                    <ModelsExplorerComponent
+                      modelsInfo={this._modelsInfo}
+                      activeTab={this.state.activeTab === "models"}
+                      bimViewer={this}
+                      viewer={this.viewer}
+                      server={this.server}
+                      numModelsLoaded={this._numModelsLoaded}
+                      enableEditModels={this._enableAddModels}
+                      ref={this.modelsExplorerRef}
+                      loadModel={this.loadModel}
+                      unloadModel={this.unloadModel}
+                      error={this.error}
+                      destroy={() => {this.destroy()}}
+                      loadAll={this.handleLoadAllModels}
+                      unloadAll={this.handleUnloadAllModels}
+                      addModel={this.handleAddModel}
+                      setActiveTab={() => this.handleSetTab("models")}
+                    />
+                    <ObjectsExplorerComponent
+                      activeTab={this.state.activeTab === "objects"}
+                      bimViewer={this}
+                      viewer={this.viewer}
+                      ref={this.modelsExplorerRef}
+                      error={this.error}
+                      destroy={() => {this.destroy()}}
+                      showAll={this.handleShowAllObjects}
+                      hideAll={this.handleHideAllObjects}
+                      setActiveTab={() => this.handleSetTab("objects")}
+                    />
+                    <ClassesExplorerComponent
+                      activeTab={this.state.activeTab === "classes"}
+                      bimViewer={this}
+                      viewer={this.viewer}
+                      ref={this.modelsExplorerRef}
+                      error={this.error}
+                      destroy={() => {this.destroy()}}
+                      showAll={this.handleShowAllObjects}
+                      hideAll={this.handleHideAllObjects}
+                      setActiveTab={() => this.handleSetTab("classes")}
+                    />
+                    <StoreysExplorerComponent
+                      activeTab={this.state.activeTab === "storeys"}
+                      bimViewer={this}
+                      viewer={this.viewer}
+                      ref={this.modelsExplorerRef}
+                      error={this.error}
+                      destroy={() => {this.destroy()}}
+                      showAll={this.handleShowAllObjects}
+                      hideAll={this.handleHideAllObjects}
+                      setActiveTab={() => this.handleSetTab("storeys")}
+                    />
+                  </>
+                }
+              </div>
             </div>
-          </div>
-          <div id="myContent">
-            <div id="myToolbar" ref={this.toolbarElementRef}>
-              <div className="xeokit-toolbar">
-                {/* Reset button */}
-                <div className="xeokit-btn-group">
+            <div id="myContent" className={classes.myContent}>
+              <div id="myToolbar" ref={this.toolbarElementRef}>
+                <div className="xeokit-toolbar">
+                  {/* Reset button */}
+                  <div className="xeokit-btn-group">
                     <button type="button" className="xeokit-reset xeokit-btn fa fa-home fa-2x disabled" data-tippy-content="Reset view"></button>
-                </div>
-                <div className="xeokit-btn-group" role="group">
+                  </div>
+                  <div className="xeokit-btn-group" role="group">
                     {/* 3D Mode button */}
                     <button type="button" className="xeokit-threeD xeokit-btn fa fa-cube fa-2x" data-tippy-content="Toggle 2D/3D"></button>
                     {/* Perspective/Ortho Mode button */}
@@ -2437,9 +2440,9 @@ export class BIMViewer extends React.Component<Props> {
                     <button type="button" className="xeokit-fit xeokit-btn fa fa-crop fa-2x disabled" data-tippy-content="View fit"></button>   
                     {/* First Person mode button */}
                     <button type="button" className="xeokit-firstPerson xeokit-btn fa fa-male fa-2x disabled" data-tippy-content="First person"></button>
-                </div>
-                {/* Tools button group */}
-                <div className="xeokit-btn-group" role="group">
+                  </div>
+                  {/* Tools button group */}
+                  <div className="xeokit-btn-group" role="group">
                     {/* Hide tool button */}
                     <button type="button" className="xeokit-hide xeokit-btn fa fa-eraser fa-2x disabled" data-tippy-content="Hide objects"></button>
                     {/* Select tool button */}
@@ -2453,17 +2456,158 @@ export class BIMViewer extends React.Component<Props> {
                       </div>
                       <div className="xeokit-section-counter" data-tippy-content="Number of existing slices"></div>
                     </button>
+                  </div>
                 </div>
-
+              </div>
+              <canvas id="myCanvas" ref={this.canvasElementRef}></canvas>
             </div>
-            </div>
-            <canvas id="myCanvas" ref={this.canvasElementRef}></canvas>
-          </div>
+          </SplitPane>
         </div>
         <canvas id="myNavCubeCanvas" ref={this.navCubeCanvasElementRef}></canvas>
       </>
     );
   };
 }
+
+const styles = () => ({
+  root: {
+  },
+  content: {
+    flex: 1,
+    display: 'flex',
+    overflow: 'hidden',
+    flexDirection: 'column' as 'column',
+    justifyContent: 'center',
+    padding: '1vw',
+    backgroundColor: '#fff',
+  },
+  contentPage: {
+    height: '100%',
+    minWidth: '100%',
+    display: 'flex',
+    flexDirection: 'column' as 'column',
+  },
+  splitPane: {
+    height: '100%',
+    '& .Pane': {
+      display: 'flex',
+      overflow: 'auto',
+      minWidth: '400px'
+    },
+    '& .Resizer': {
+      background: '#6d6d6d',
+      opacity: 0.2,
+      zIndex: 1,
+      MozBoxSizing: 'border-box' as 'border-box',
+      WebkitBoxSizing: 'border-box' as 'border-box',
+      boxSizing: 'border-box' as 'border-box',
+      MozBackgroundClip: 'padding',
+      WebkitBackgroundClip: 'padding',
+      backgroundClip: 'padding-box'
+    },
+    '& .Resizer:hover': {
+      WebkitTransition: 'all 2s ease',
+      transition: 'all 2s ease'
+    },
+    '& .Resizer.vertical': {
+      width: '11px',
+      margin: '0 -5px',
+      borderLeft: '4px solid rgba(255, 255, 255, 0)',
+      borderRight: '4px solid rgba(255, 255, 255, 0)',
+      cursor: 'col-resize'
+    },
+    '& .Resizer.vertical:hover': {
+      borderLeft: '4px solid rgba(0, 0, 0, 0.5)',
+      borderRight: '4px solid rgba(0, 0, 0, 0.5)'
+    },
+    '& .Resizer.horizontal': {
+      height: '11px',
+      margin: '-5px 0px',
+      borderTop: '4px solid rgba(255, 255, 255, 0)',
+      borderBottom: '4px solid rgba(255, 255, 255, 0)',
+      cursor: 'row-resize',
+      width: '100%'
+    },
+    '& .Resizer.horizontal:hover': {
+      borderTop: '4px solid rgba(0, 0, 0, 0.5)',
+      borderBottom: '4px solid rgba(0, 0, 0, 0.5)'
+    }
+  },
+  splitPaneStyle: {
+    position: 'relative' as 'relative',
+  },
+  pane: {
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column' as 'column'
+  },
+  leftPane: {
+    flex: 1,
+    paddingRight: '1vw',
+    display: 'flex',
+    flexDirection: 'column' as 'column'
+  },
+  rightPane: {
+    flex: 1,
+    paddingLeft: '1vw',
+    display: 'flex',
+    flexDirection: 'column' as 'column'
+  },
+  myExplorer: {
+    width: '100%',
+    height: '100%',
+    background: '#03103F',
+    color: '#fff',
+    transition: 'all 0.3s',
+    padding: '0',
+    paddingLeft: '15px',
+    overflowY: 'hidden' as 'hidden',
+    '&.active': {
+      marginLeft: '0',
+    },
+    '& .explorer-toolbar': {
+      padding: '0',
+      background: '#03103F',
+    },
+    '& ul.components': {
+      padding: '20px 0',
+      borderBottom: '1px solid #47748b',
+    },
+    '& ul p': {
+      color: '#CFCFCF',
+      padding: '10px',
+    },
+    '& ul li a': {
+      padding: '0',
+      fontSize: '14px',
+      display: 'block',
+    },
+    '& ul li a:hover': {
+      color: '#477dca',
+    },
+    '& ul li.active > a': {
+      color: '#fff',
+      background: '#03103F',
+    },
+    '& a[aria-expanded="true"]': {
+      color: '#fff',
+      background: '#03103F',
+    },
+    '& input[type="checkbox"]': {
+      backgroundColor: 'initial',
+      cursor: 'default',
+      WebkitAppearance: 'checkbox',
+      boxSizing: 'border-box',
+      margin: '3px 4px 3px 8px',
+      padding: 'initial',
+      border: 'initial',
+    },
+  },
+  myContent: {
+    width: '100%',
+    height: '100%',
+    background: '#f2f2f2',
+  },
+});
 
 export default withStyles(styles)(BIMViewer);
