@@ -183,10 +183,10 @@ export class BIMViewer extends React.Component<Props> {
     _queryTool: QueryTool;
     _sectionTool: SectionTool;
     // Explorers
-    _modelsExplorer: ModelsExplorer;
-    _objectsExplorer: ObjectsExplorer;
-    _classesExplorer: ClassesExplorer;
-    _storeysExplorer: StoreysExplorer;
+    // _modelsExplorer: ModelsExplorer;
+    // _objectsExplorer: ObjectsExplorer;
+    // _classesExplorer: ClassesExplorer;
+    // _storeysExplorer: StoreysExplorer;
 
     // Controller properties
     _children: Controller[];
@@ -208,7 +208,10 @@ export class BIMViewer extends React.Component<Props> {
 
     canvasElementRef: React.RefObject<HTMLCanvasElement>;
     explorerElementRef: React.RefObject<HTMLDivElement>;
-    modelsExplorerRef: React.RefObject<HTMLDivElement>;
+    modelsExplorerRef: React.RefObject<ModelsExplorer>;
+    objectsExplorerRef: React.RefObject<ObjectsExplorer>;
+    classesExplorerRef: React.RefObject<ClassesExplorer>;
+    storeysExplorerRef: React.RefObject<StoreysExplorer>;
     toolbarElementRef: React.RefObject<HTMLDivElement>;
     navCubeCanvasElementRef: React.RefObject<HTMLCanvasElement>;
     busyModelBackdropElementRef: React.RefObject<HTMLDivElement>;
@@ -244,6 +247,9 @@ export class BIMViewer extends React.Component<Props> {
         this.canvasElementRef = React.createRef();
         this.explorerElementRef = React.createRef();
         this.modelsExplorerRef = React.createRef();
+        this.objectsExplorerRef = React.createRef();
+        this.classesExplorerRef = React.createRef();
+        this.storeysExplorerRef = React.createRef();
         this.toolbarElementRef = React.createRef();
         this.navCubeCanvasElementRef = React.createRef();
         this.busyModelBackdropElementRef = React.createRef();
@@ -1429,14 +1435,14 @@ export class BIMViewer extends React.Component<Props> {
         if (viewerState.tabOpen && !this.state.activeTab) {
             this.setState({activeTab: viewerState.tabOpen});
         }
-        if (viewerState.expandObjectsTree) {
-            this._objectsExplorer.expandTreeViewToDepth(viewerState.expandObjectsTree);
+        if (viewerState.expandObjectsTree && this.objectsExplorerRef.current) {
+            this.objectsExplorerRef.current.expandTreeViewToDepth(viewerState.expandObjectsTree);
         }
-        if (viewerState.expandClassesTree) {
-            this._classesExplorer.expandTreeViewToDepth(viewerState.expandClassesTree);
+        if (viewerState.expandClassesTree && this.classesExplorerRef.current) {
+            this.classesExplorerRef.current.expandTreeViewToDepth(viewerState.expandClassesTree);
         }
-        if (viewerState.expandStoreysTree) {
-            this._storeysExplorer.expandTreeViewToDepth(viewerState.expandStoreysTree);
+        if (viewerState.expandStoreysTree && this.storeysExplorerRef.current) {
+            this.storeysExplorerRef.current.expandTreeViewToDepth(viewerState.expandStoreysTree);
         }
         if (viewerState.setCamera) {
             this.setCamera(viewerState.setCamera);
@@ -1476,9 +1482,15 @@ export class BIMViewer extends React.Component<Props> {
             this.error("showObjectInExplorers() - Argument expected: objectId");
             return;
         }
-        this._objectsExplorer.showNodeInTreeView(objectId);
-        this._classesExplorer.showNodeInTreeView(objectId);
-        this._storeysExplorer.showNodeInTreeView(objectId);
+        if (this.objectsExplorerRef.current) {
+          this.objectsExplorerRef.current.showNodeInTreeView(objectId);
+        }
+        if (this.classesExplorerRef.current) {
+          this.classesExplorerRef.current.showNodeInTreeView(objectId);
+        }
+        if (this.storeysExplorerRef.current) {
+          this.storeysExplorerRef.current.showNodeInTreeView(objectId);
+        }
     }
 
     /**
@@ -1489,9 +1501,15 @@ export class BIMViewer extends React.Component<Props> {
      * For each tab, does nothing if a node is currently highlighted.
      */
     unShowObjectInExplorers() {
-        this._objectsExplorer.unShowNodeInTreeView();
-        this._classesExplorer.unShowNodeInTreeView();
-        this._storeysExplorer.unShowNodeInTreeView();
+      if (this.objectsExplorerRef.current) {
+        this.objectsExplorerRef.current.unShowNodeInTreeView();
+      }
+      if (this.classesExplorerRef.current) {
+        this.classesExplorerRef.current.unShowNodeInTreeView();
+      }
+      if (this.storeysExplorerRef.current) {
+        this.storeysExplorerRef.current.unShowNodeInTreeView();
+      }
     }
 
     /**
@@ -1852,7 +1870,9 @@ export class BIMViewer extends React.Component<Props> {
             this.error("selectStorey() - Object is not an IfcBuildingStorey: '" + storeyObjectId + "'");
             return;
         }
-        this._storeysExplorer.selectStorey(storeyObjectId, done);
+        if (this.storeysExplorerRef.current) {
+          this.storeysExplorerRef.current.selectStorey(storeyObjectId, done);
+        }
     }
 
     /**
@@ -1992,14 +2012,14 @@ export class BIMViewer extends React.Component<Props> {
         // Explorer
 
         // Models tab is always enabled
-        if (this._objectsExplorer) {
-          this._objectsExplorer.setEnabled(enabled);
+        if (this.objectsExplorerRef.current) {
+          this.objectsExplorerRef.current.setEnabled(enabled);
         }
-        if (this._classesExplorer) {
-          this._classesExplorer.setEnabled(enabled);
+        if (this.classesExplorerRef.current) {
+          this.classesExplorerRef.current.setEnabled(enabled);
         }
-        if (this._storeysExplorer) {
-          this._storeysExplorer.setEnabled(enabled);
+        if (this.storeysExplorerRef.current) {
+          this.storeysExplorerRef.current.setEnabled(enabled);
         }
 
         // Toolbar
@@ -2391,7 +2411,7 @@ export class BIMViewer extends React.Component<Props> {
                       activeTab={this.state.activeTab === "objects"}
                       bimViewer={this}
                       viewer={this.viewer}
-                      ref={this.modelsExplorerRef}
+                      ref={this.objectsExplorerRef}
                       error={this.error}
                       destroy={() => {this.destroy()}}
                       showAll={this.handleShowAllObjects}
@@ -2402,7 +2422,7 @@ export class BIMViewer extends React.Component<Props> {
                       activeTab={this.state.activeTab === "classes"}
                       bimViewer={this}
                       viewer={this.viewer}
-                      ref={this.modelsExplorerRef}
+                      ref={this.classesExplorerRef}
                       error={this.error}
                       destroy={() => {this.destroy()}}
                       showAll={this.handleShowAllObjects}
@@ -2413,7 +2433,7 @@ export class BIMViewer extends React.Component<Props> {
                       activeTab={this.state.activeTab === "storeys"}
                       bimViewer={this}
                       viewer={this.viewer}
-                      ref={this.modelsExplorerRef}
+                      ref={this.storeysExplorerRef}
                       error={this.error}
                       destroy={() => {this.destroy()}}
                       showAll={this.handleShowAllObjects}
