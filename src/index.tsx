@@ -1,9 +1,9 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import tippy from "tippy.js";
-import "../public/css/backdrop.css";
-import "../public/css/BIMViewer.css";
-import "../public/css/style.css";
+import "../css/backdrop.css";
+import "../css/BIMViewer.css";
+import "../css/style.css";
 import BIMViewerComponent, {BIMViewer} from "./BIMViewer";
 import { Server } from "./server/Server";
 import { styleTheme } from './styles/Theme';
@@ -28,7 +28,7 @@ interface HashParameters {
 
 // Server client will load data from the file systems
 const server = new Server({
-    dataDir: "./dist/data"
+    dataDir: "./public/data"
 });
 
 // Create  BIMViewer that loads data via the Server

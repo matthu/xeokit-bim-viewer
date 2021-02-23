@@ -1,4 +1,3 @@
-
 const path = require('path');
 // const CircularDependencyPlugin = require('circular-dependency-plugin');
 
@@ -91,6 +90,6 @@ module.exports = {
     // })
     new ForkTsCheckerWebpackPlugin({ async: true }),
     new CleanWebpackPlugin(),
-    new CopyWebpackPlugin({ patterns: [ { from: 'public', to: 'dist' } ]}),
+    new CopyWebpackPlugin({ patterns: [ { from: 'css', to: 'public/css' }, { from: 'data', to: 'public/data' }, { from: 'lib', to: 'public/lib' } ]}),
   ]
 };

@@ -9,6 +9,7 @@
   "files": [
     "/css",
     "/lib",
+    "/data",
     "/src",
     "/dist"
   ],
