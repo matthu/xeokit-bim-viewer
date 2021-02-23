@@ -1,4 +1,5 @@
 declare module '@xeokit/xeokit-sdk/src/viewer/metadata/MetaObject.js' {
+    import { MetaModel } from "@xeokit/xeokit-sdk/src/viewer/metadata/MetaModel.js";
     /**
      * @desc Metadata corresponding to an {@link Entity} that represents an object.
      *
@@ -23,7 +24,7 @@ declare module '@xeokit/xeokit-sdk/src/viewer/metadata/MetaObject.js' {
          * @property metaModel
          * @type {MetaModel}
          */
-        metaModel: any;
+        metaModel: MetaModel;
         /**
          * Globally-unique ID.
          *

@@ -6,6 +6,8 @@ import "../public/css/BIMViewer.css";
 import "../public/css/style.css";
 import BIMViewerComponent, {BIMViewer} from "./BIMViewer";
 import { Server } from "./server/Server";
+import { styleTheme } from './styles/Theme';
+import { MuiThemeProvider } from '@material-ui/core/styles';
 
 
 interface RequestParameters {
@@ -237,12 +239,14 @@ class App extends React.Component {
 
   public render() {
     return (
-      <BIMViewerComponent
-        defaultTab={this.defaultTab}
-        server={server}
-        enableEditModels={this.enableEditModels}
-        ref={this.bimViewer}
-      />
+      <MuiThemeProvider theme={styleTheme}>
+        <BIMViewerComponent
+          defaultTab={this.defaultTab}
+          server={server}
+          enableEditModels={this.enableEditModels}
+          ref={this.bimViewer}
+        />
+      </MuiThemeProvider>
     );
   };
 }

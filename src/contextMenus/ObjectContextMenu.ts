@@ -47,7 +47,14 @@ class ObjectContextMenu extends ContextMenu {
                             const objectId: string = context.entity.id;
                             context.showObjectInExplorers(objectId);
                         }
-                    }
+                    },
+                    {
+                      title: "Show properties",
+                      doAction: function (context: any) {
+                          const objectId: string = context.entity.id;
+                          context.showObjectProperties(objectId);
+                      }
+                  }
                 ],
                 [
                     {

@@ -1,4 +1,5 @@
 import * as React from 'react';
+import ConfirmationDialog from './ConfirmationDialog';
 import { withStyles, WithStyles } from '@material-ui/core/styles';
 import { BCFViewpointsPlugin } from "@xeokit/xeokit-sdk/src/plugins/BCFViewpointsPlugin/BCFViewpointsPlugin.js";
 import { Entity } from "@xeokit/xeokit-sdk/src/viewer/scene/Entity.js";
@@ -145,6 +146,19 @@ interface Props extends BIMConfig, WithStyles<typeof styles> {
   defaultTab: "models" | "objects" | "classes" | "storeys";
 }
 
+interface ObjectProperties {
+  id: string;
+  name: string;
+  type: string;
+  hierarchy: string[];
+  modelAuthor: string;
+  modelRevisionId: string;
+  modelCreatedAt: string;
+  modelCreatedApp: string;
+  modelId: string;
+  projectId: string;
+}
+
 /**
  * @desc A BIM viewer based on the [xeokit SDK](http://xeokit.io).
  *
@@ -153,6 +167,7 @@ interface Props extends BIMConfig, WithStyles<typeof styles> {
 export class BIMViewer extends React.Component<Props> {
     state: {
       activeTab: "models" | "objects" | "classes" | "storeys";
+      showObjectProperties: ObjectProperties;
     }
 
     cfg: BIMConfig;
@@ -280,6 +295,7 @@ export class BIMViewer extends React.Component<Props> {
 
         this.state = {
           activeTab: props.defaultTab,
+          showObjectProperties: null,
         };
     }
 
@@ -694,6 +710,51 @@ export class BIMViewer extends React.Component<Props> {
                         }
                         this.showObjectInExplorers(objectId);
                     },
+                    showObjectProperties: (objectId: any) => {
+                      // this.getObjectInfo("WestRiversideHospital", "architectural", "2HaS6zNOX8xOGjmaNi_r6b",
+                      //   (objectInfo: any) => {
+                      //       console.log(JSON.stringify(objectInfo, null, "\t"));
+                      //   },
+                      //   (errMsg: string) => {
+                      //       console.log("Oops! There was an error getting info for this object: " + errMsg);
+                      //   }
+                      // );
+                      const objectProperties: ObjectProperties = {
+                        id: objectId,
+                        hierarchy: null,
+                        modelAuthor: null,
+                        modelCreatedApp: null,
+                        modelCreatedAt: null,
+                        modelId: null,
+                        modelRevisionId: null,
+                        name: null,
+                        projectId: null,
+                        type: null,
+                      }
+                      if (this.viewer.metaScene.metaObjects[objectId]) {
+                        const object = this.viewer.metaScene.metaObjects[objectId];
+                        objectProperties.type = object.type;
+                        objectProperties.name = object.name;
+                        objectProperties.projectId = object.metaModel.projectId.toString();
+                        objectProperties.modelRevisionId = object.metaModel.revisionId.toString();
+                        objectProperties.modelId = object.metaModel.id as string;
+                        objectProperties.modelAuthor = object.metaModel.author;
+                        objectProperties.modelCreatedAt = object.metaModel.createdAt;
+                        objectProperties.modelCreatedApp = object.metaModel.creatingApplication;
+                        const hierarchy: string[] = [object.name];
+                        let parent = object.parent;
+                        while (parent != null) {
+                          if (parent.name && parent.name != "Default") {
+                            hierarchy.push(parent.name);
+                          } else if (parent.type) {
+                            hierarchy.push(parent.type);
+                          }
+                          parent = parent.parent;
+                        }
+                        objectProperties.hierarchy = hierarchy.reverse();
+                      }
+                      this.setState({showObjectProperties: objectProperties});
+                  },
                     entity: hit.entity
                 };
                 this._objectContextMenu.show(event.pageX, event.pageY);
@@ -2371,6 +2432,32 @@ export class BIMViewer extends React.Component<Props> {
     const { classes } = this.props;
     return (
       <>
+        { this.state.showObjectProperties != null &&
+          <ConfirmationDialog
+            title="Object Properties"
+            continueText="Okay"
+            centered
+            content={<>
+              <div className={classes.dialogRow}><div className={classes.dialogLabel}>ID:</div><div className={classes.dialogValue}>{this.state.showObjectProperties.id}</div></div>
+              <div className={classes.dialogRow}><div className={classes.dialogLabel}>Name:</div><div className={classes.dialogValue}>{this.state.showObjectProperties.name ?? 'None'}</div></div>
+              <div className={classes.dialogRow}><div className={classes.dialogLabel}>Type:</div><div className={classes.dialogValue}>{this.state.showObjectProperties.type ?? 'None'}</div></div>
+              <div className={classes.dialogRow}><div className={classes.dialogLabel}>Hierarchy:</div><div className={classes.dialogValue}>{this.state.showObjectProperties.hierarchy ? this.state.showObjectProperties.hierarchy.join(' > ') : 'None'}</div></div>
+              <div className={classes.dialogRow}><div className={classes.dialogLabel}>Project ID:</div><div className={classes.dialogValue}>{this.state.showObjectProperties.projectId ?? 'None'}</div></div>
+              <div className={classes.dialogRow}><div className={classes.dialogLabel}>Model ID:</div><div className={classes.dialogValue}>{this.state.showObjectProperties.modelId ?? 'None'}</div></div>
+              <div className={classes.dialogRow}><div className={classes.dialogLabel}>Model Revision ID:</div><div className={classes.dialogValue}>{this.state.showObjectProperties.modelRevisionId ?? 'None'}</div></div>
+              <div className={classes.dialogRow}><div className={classes.dialogLabel}>Model Author:</div><div className={classes.dialogValue}>{this.state.showObjectProperties.modelAuthor ?? 'None'}</div></div>
+              <div className={classes.dialogRow}><div className={classes.dialogLabel}>Model Created:</div><div className={classes.dialogValue}>{this.state.showObjectProperties.modelCreatedAt ?? 'None'}</div></div>
+              <div className={classes.dialogRow}><div className={classes.dialogLabel}>Model Creation App:</div><div className={classes.dialogValue}>{this.state.showObjectProperties.modelCreatedApp ?? 'None'}</div></div>
+            </>}
+            onClose={() => {
+              this.setState({showObjectProperties: null});
+            }}
+            onContinue={() => {
+              this.setState({showObjectProperties: null});
+            }}
+          />
+        }
+        <div id="testing"></div>
         <div id="myViewer" className="xeokit-busy-modal-backdrop" ref={this.busyModelBackdropElementRef}>
           <SplitPane
             className={classes.splitPane}
@@ -2627,6 +2714,19 @@ const styles = () => ({
     width: '100%',
     height: '100%',
     background: '#f2f2f2',
+  },
+  dialogRow: {
+    paddingBottom: '10px',
+  },
+  dialogLabel: {
+    minWidth: '150px',
+    fontWeight: 'bold' as 'bold',
+    display: 'inline-block',
+    verticalAlign: 'top',
+  },
+  dialogValue: {
+    display: 'inline-block',
+    maxWidth: '60%',
   },
 });
 
