@@ -1,6 +1,7 @@
 import { withStyles, WithStyles } from '@material-ui/core/styles';
 import * as React from 'react';
 import SplitPane from 'react-split-pane';
+import tippy from "tippy.js";
 import { BusyModal } from "./BusyModal";
 import ConfirmationDialog from './ConfirmationDialog';
 import { CanvasContextMenu } from "./contextMenus/CanvasContextMenu";
@@ -189,7 +190,7 @@ export class BIMViewer extends React.Component<Props> {
     _fitAction: FitAction;
     //Modes
     _threeDMode: ThreeDMode;
-    _orthoMode: OrthoMode;
+    // _orthoMode: OrthoMode;
     _navCubeMode: NavCubeMode;
     _firstPersonMode: FirstPersonMode;
     //Tools
@@ -336,6 +337,13 @@ export class BIMViewer extends React.Component<Props> {
         this._initCanvasContextMenus();
         this._initConfigs();
 
+        // Create tooltips on various HTML elements created by BIMViewer
+        tippy('[data-tippy-content]', {
+          appendTo: function () {
+              return document.querySelector('#myViewer')
+          }
+        });
+
         // this._explorerElement = explorerElement;
 
         // initTabs(explorerElement);
@@ -414,10 +422,10 @@ export class BIMViewer extends React.Component<Props> {
             active: false
         });
 
-        this._orthoMode = new OrthoMode(this, {
-            buttonElement: toolbarElement.querySelector(".xeokit-ortho"),
-            active: false
-        });
+        // this._orthoMode = new OrthoMode(this, {
+        //     buttonElement: toolbarElement.querySelector(".xeokit-ortho"),
+        //     active: false
+        // });
 
         this._firstPersonMode = new FirstPersonMode(this, {
             buttonElement: toolbarElement.querySelector(".xeokit-firstPerson"),
@@ -1897,9 +1905,9 @@ export class BIMViewer extends React.Component<Props> {
      * @param {Boolean} enabled Set true to switch into ortho mode, else false to switch into perspective mode.
      * @param {Function} done Callback to invoke when switch complete. Supplying this callback causes an animated transition. Otherwise, the transition will be instant.
      */
-    setOrthoEnabled(enabled: boolean, done: any) {
-        this._orthoMode.setActive(enabled, done);
-    }
+    // setOrthoEnabled(enabled: boolean, done: any) {
+    //     this._orthoMode.setActive(enabled, done);
+    // }
 
     /**
      * Gets whether the viewer is in orthographic viewing mode.
@@ -1908,9 +1916,9 @@ export class BIMViewer extends React.Component<Props> {
      *
      * @returns {boolean} True when in ortho mode, else false when in perspective mode.
      */
-    getOrthoEnabled() {
-        return this._orthoMode.getActive();
-    }
+    // getOrthoEnabled() {
+    //     return this._orthoMode.getActive();
+    // }
 
     /**
      * Transitions the viewer into an isolated view of the given building storey.
@@ -2088,7 +2096,7 @@ export class BIMViewer extends React.Component<Props> {
         this._resetAction.setEnabled(enabled);
         this._fitAction.setEnabled(enabled);
         this._threeDMode.setEnabled(enabled);
-        this._orthoMode.setEnabled(enabled);
+        // this._orthoMode.setEnabled(enabled);
         this._firstPersonMode.setEnabled(enabled);
         this._queryTool.setEnabled(enabled);
         this._hideTool.setEnabled(enabled);
@@ -2457,7 +2465,6 @@ export class BIMViewer extends React.Component<Props> {
             }}
           />
         }
-        <div id="testing"></div>
         <div id="myViewer" className="xeokit-busy-modal-backdrop" ref={this.busyModelBackdropElementRef}>
           <SplitPane
             className={classes.splitPane}
@@ -2542,7 +2549,7 @@ export class BIMViewer extends React.Component<Props> {
                     {/* 3D Mode button */}
                     <button type="button" className="xeokit-threeD xeokit-btn fa fa-cube fa-2x" data-tippy-content="Toggle 2D/3D"></button>
                     {/* Perspective/Ortho Mode button */}
-                    <button type="button" className="xeokit-ortho xeokit-btn fa fa-th fa-2x" data-tippy-content="Toggle Perspective/Ortho"></button>
+                    {/* <button type="button" className="xeokit-ortho xeokit-btn fa fa-th fa-2x" data-tippy-content="Toggle Perspective/Ortho"></button> */}
                     {/* Fit button */}
                     <button type="button" className="xeokit-fit xeokit-btn fa fa-crop fa-2x disabled" data-tippy-content="View fit"></button>   
                     {/* First Person mode button */}

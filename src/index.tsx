@@ -1,9 +1,5 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import tippy from "tippy.js";
-import "../css/backdrop.css";
-import "../css/BIMViewer.css";
-import "../css/style.css";
 import BIMViewerComponent, {BIMViewer} from "./BIMViewer";
 import { Server } from "./server/Server";
 import { styleTheme } from './styles/Theme';
@@ -40,13 +36,6 @@ const server = new Server({
 //     busyModelBackdropElement: document.querySelector(".xeokit-busy-modal-backdrop"),
 //     enableEditModels: enableEditModels
 // });
-
-// Create tooltips on various HTML elements created by BIMViewer
-tippy('[data-tippy-content]', {
-    appendTo: function () {
-        return document.querySelector('#myViewer')
-    }
-});
 
 // // Log info on whatever objects we click with the BIMViewer's Query tool
 // bimViewer.on("queryPicked", (event: any) => {
