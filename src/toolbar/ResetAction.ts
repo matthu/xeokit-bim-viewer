@@ -1,7 +1,7 @@
-import { math } from "@xeokit/xeokit-sdk/src/viewer/scene/math/math.js";
-import { ModelMemento } from "@xeokit/xeokit-sdk/src/viewer/scene/mementos/ModelMemento.js";
 import { BIMConfig } from "../BIMViewer";
 import { Controller } from "../Controller";
+import { math } from "../xeokit-sdk/viewer/scene/math/math";
+import { ModelMemento } from "../xeokit-sdk/viewer/scene/mementos/ModelMemento";
 
 const tempVec3a = math.vec3();
 
@@ -131,3 +131,4 @@ class ResetAction extends Controller {
 }
 
 export { ResetAction };
+

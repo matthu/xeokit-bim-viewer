@@ -1,11 +1,12 @@
-import { Map } from "@xeokit/xeokit-sdk/src/viewer/scene/utils/Map.js";
-import { Viewer } from "@xeokit/xeokit-sdk/src/viewer/Viewer.js";
+import { Server } from "./server/Server";
+import { Map } from "./xeokit-sdk/viewer/scene/utils/Map";
+import { Viewer } from "./xeokit-sdk/viewer/Viewer";
 
 /** @private */
 class Controller {
     
     bimViewer: any;
-    server: any;
+    server: Server;
     viewer: Viewer;
 
     _children: Controller[];

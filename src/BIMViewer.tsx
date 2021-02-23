@@ -1,13 +1,8 @@
-import * as React from 'react';
-import ConfirmationDialog from './ConfirmationDialog';
 import { withStyles, WithStyles } from '@material-ui/core/styles';
-import { BCFViewpointsPlugin } from "@xeokit/xeokit-sdk/src/plugins/BCFViewpointsPlugin/BCFViewpointsPlugin.js";
-import { Entity } from "@xeokit/xeokit-sdk/src/viewer/scene/Entity.js";
-import { AmbientLight } from "@xeokit/xeokit-sdk/src/viewer/scene/lights/AmbientLight.js";
-import { DirLight } from "@xeokit/xeokit-sdk/src/viewer/scene/lights/DirLight.js";
-import { math } from "@xeokit/xeokit-sdk/src/viewer/scene/math/math.js";
-import { Viewer } from "@xeokit/xeokit-sdk/src/viewer/Viewer.js";
+import * as React from 'react';
+import SplitPane from 'react-split-pane';
 import { BusyModal } from "./BusyModal";
+import ConfirmationDialog from './ConfirmationDialog';
 import { CanvasContextMenu } from "./contextMenus/CanvasContextMenu";
 import { ObjectContextMenu } from "./contextMenus/ObjectContextMenu";
 import { Controller } from "./Controller";
@@ -17,7 +12,6 @@ import ObjectsExplorerComponent, { ObjectsExplorer } from "./explorer/ObjectsExp
 import StoreysExplorerComponent, { StoreysExplorer } from "./explorer/StoreysExplorer";
 import { ModelIFCObjectColors } from "./IFCObjectDefaults/ModelIFCObjectColors";
 import { ViewerIFCObjectColors } from "./IFCObjectDefaults/ViewerIFCObjectColors";
-import { XKTLoaderPlugin } from "@xeokit/xeokit-sdk/src/plugins/XKTLoaderPlugin/XKTLoaderPlugin.js";
 import { Server } from "./server/Server";
 import { FirstPersonMode } from "./toolbar/FirstPersonMode";
 import { FitAction } from "./toolbar/FitAction";
@@ -29,8 +23,14 @@ import { ResetAction } from "./toolbar/ResetAction";
 import { SectionTool } from "./toolbar/SectionTool";
 import { SelectionTool } from "./toolbar/SelectionTool";
 import { ThreeDMode } from "./toolbar/ThreeDMode";
-import { Map } from '@xeokit/xeokit-sdk/src/viewer/scene/utils/Map.js';
-import SplitPane from 'react-split-pane';
+import { BCFViewpointsPlugin } from './xeokit-sdk/plugins/BCFViewpointsPlugin/BCFViewpointsPlugin';
+import { XKTLoaderPlugin } from './xeokit-sdk/plugins/XKTLoaderPlugin/XKTLoaderPlugin';
+import { Entity } from './xeokit-sdk/viewer/scene/Entity';
+import { AmbientLight } from './xeokit-sdk/viewer/scene/lights/AmbientLight';
+import { DirLight } from './xeokit-sdk/viewer/scene/lights/DirLight';
+import { math } from './xeokit-sdk/viewer/scene/math/math';
+import { Map } from './xeokit-sdk/viewer/scene/utils/Map';
+import { Viewer } from "./xeokit-sdk/viewer/Viewer.js";
 
 const tempVec3 = math.vec3();
 

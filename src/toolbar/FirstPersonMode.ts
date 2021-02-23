@@ -1,5 +1,5 @@
-import { CameraControl } from "@xeokit/xeokit-sdk/src/viewer/scene/CameraControl/CameraControl.js";
 import { Controller } from "../Controller";
+import { CameraControl } from "../xeokit-sdk/viewer/scene/CameraControl/CameraControl";
 
 interface FirstPersonModeCameraControl extends CameraControl {
   pivoting: boolean;

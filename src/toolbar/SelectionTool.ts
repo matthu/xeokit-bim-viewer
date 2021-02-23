@@ -1,6 +1,6 @@
-import { Entity } from "@xeokit/xeokit-sdk/src/viewer/scene/Entity.js";
-import { math } from "@xeokit/xeokit-sdk/src/viewer/scene/math/math.js";
 import { Controller } from "../Controller";
+import { Entity } from "../xeokit-sdk/viewer/scene/Entity";
+import { math } from "../xeokit-sdk/viewer/scene/math/math";
 
 function closeEnough(p: number[], q: number[]) {
     const CLICK_DIST = 4;

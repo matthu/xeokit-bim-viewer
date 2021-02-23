@@ -1,8 +1,8 @@
-import { SectionPlanesPlugin } from "@xeokit/xeokit-sdk/src/plugins/SectionPlanesPlugin/SectionPlanesPlugin.js";
-import { math } from "@xeokit/xeokit-sdk/src/viewer/scene/math/math.js";
 import { BIMConfig } from "../BIMViewer";
 import { SectionToolContextMenu } from "../contextMenus/SectionToolContextMenu";
 import { Controller } from "../Controller";
+import { SectionPlanesPlugin } from "../xeokit-sdk/plugins/SectionPlanesPlugin/SectionPlanesPlugin";
+import { math } from "../xeokit-sdk/viewer/scene/math/math";
 
 /** @private */
 class SectionTool extends Controller { // XX

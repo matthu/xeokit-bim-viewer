@@ -1,5 +1,5 @@
-import { ContextMenu } from "@xeokit/xeokit-sdk/src/extras/ContextMenu/ContextMenu.js";
-import { math } from "@xeokit/xeokit-sdk/src/viewer/scene/math/math.js";
+import { ContextMenu } from "../xeokit-sdk/extras/ContextMenu/ContextMenu";
+import { math } from "../xeokit-sdk/viewer/scene/math/math";
 
 /**
  * @private

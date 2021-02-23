@@ -1,9 +1,9 @@
-import { CameraFlightAnimation } from "@xeokit/xeokit-sdk/src/viewer/scene/camera/CameraFlightAnimation.js";
-import { math } from "@xeokit/xeokit-sdk/src/viewer/scene/math/math.js";
-import { Scene } from "@xeokit/xeokit-sdk/src/viewer/scene/scene/Scene.js";
-import { Viewer } from "@xeokit/xeokit-sdk/src/viewer/Viewer.js";
 import { BIMConfig } from '../BIMViewer';
 import { Controller } from "../Controller";
+import { CameraFlightAnimation } from '../xeokit-sdk/viewer/scene/camera/CameraFlightAnimation';
+import { math } from '../xeokit-sdk/viewer/scene/math/math';
+import { Scene } from '../xeokit-sdk/viewer/scene/scene/Scene';
+import { Viewer } from '../xeokit-sdk/viewer/Viewer';
 
 const tempVec3 = math.vec3();
 

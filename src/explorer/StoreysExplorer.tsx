@@ -1,11 +1,11 @@
 import * as React from 'react';
 import { withStyles, WithStyles } from '@material-ui/core/styles';
-import { TreeViewPlugin } from "@xeokit/xeokit-sdk/src/plugins/TreeViewPlugin/TreeViewPlugin.js";
-import { math } from "@xeokit/xeokit-sdk/src/viewer/scene/math/math.js";
 import { TreeViewContextMenu } from "../contextMenus/TreeViewContextMenu";
 import { Controller } from "../Controller";
 import { BIMViewer } from '../BIMViewer';
-import { Viewer } from '@xeokit/xeokit-sdk/src/viewer/Viewer.js';
+import { math } from '../xeokit-sdk/viewer/scene/math/math';
+import { Viewer } from '../xeokit-sdk/viewer/Viewer';
+import { TreeViewPlugin } from '../xeokit-sdk/plugins/TreeViewPlugin/TreeViewPlugin';
 
 const tempVec3 = math.vec3();
 

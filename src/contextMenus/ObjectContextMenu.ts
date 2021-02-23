@@ -1,6 +1,6 @@
-import { ContextMenu } from "@xeokit/xeokit-sdk/src/extras/ContextMenu/ContextMenu.js";
-import { math } from "@xeokit/xeokit-sdk/src/viewer/scene/math/math.js";
-import { Viewer } from "@xeokit/xeokit-sdk/src/viewer/Viewer.js";
+import { ContextMenu } from "../xeokit-sdk/extras/ContextMenu/ContextMenu.js";
+import { math } from "../xeokit-sdk/viewer/scene/math/math.js";
+import { Viewer } from "../xeokit-sdk/viewer/Viewer.js";
 
 /**
  * @private

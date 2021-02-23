@@ -1,9 +1,9 @@
-import { ContextMenu } from "@xeokit/xeokit-sdk/src/extras/ContextMenu/ContextMenu.js";
-import { SectionPlanesPlugin } from "@xeokit/xeokit-sdk/src/plugins/SectionPlanesPlugin/SectionPlanesPlugin.js";
-import { math } from "@xeokit/xeokit-sdk/src/viewer/scene/math/math.js";
-import { SectionPlane } from "@xeokit/xeokit-sdk/src/viewer/scene/sectionPlane/SectionPlane.js";
-import { utils } from "@xeokit/xeokit-sdk/src/viewer/scene/utils.js";
-import { Viewer } from "@xeokit/xeokit-sdk/src/viewer/Viewer.js";
+import { ContextMenu } from "../xeokit-sdk/extras/ContextMenu/ContextMenu";
+import { SectionPlanesPlugin } from "../xeokit-sdk/plugins/SectionPlanesPlugin/SectionPlanesPlugin";
+import { math } from "../xeokit-sdk/viewer/scene/math/math";
+import { SectionPlane } from "../xeokit-sdk/viewer/scene/sectionPlane/SectionPlane";
+import { utils } from "../xeokit-sdk/viewer/scene/utils";
+import { Viewer } from "../xeokit-sdk/viewer/Viewer";
 
 const tempAABB = math.AABB3();
 const tempVec3 = math.vec3();

@@ -1,13 +1,12 @@
 import * as React from 'react';
 import { withStyles, WithStyles } from '@material-ui/core/styles';
 
-import { math } from "@xeokit/xeokit-sdk/src/viewer/scene/math/math.js";
 import { BIMViewer, ViewerConfig, ViewerContent, ViewerInfo, ViewerInfoModel, ViewerState } from '../BIMViewer';
 import { ModelsContextMenu } from "../contextMenus/ModelsContextMenu";
 import { Controller } from "../Controller";
 
-import { Viewer } from '@xeokit/xeokit-sdk/src/viewer/Viewer.js';
 import { Server } from '../server/Server';
+import { Viewer } from '../xeokit-sdk/viewer/Viewer';
 
 interface Props extends WithStyles<typeof styles> {
   ref: any;

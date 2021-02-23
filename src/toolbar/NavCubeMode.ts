@@ -1,5 +1,5 @@
-import { NavCubePlugin } from "@xeokit/xeokit-sdk/src/plugins/NavCubePlugin/NavCubePlugin.js";
 import { Controller } from "../Controller";
+import { NavCubePlugin } from "../xeokit-sdk/plugins/NavCubePlugin/NavCubePlugin";
 
 /** @private */
 class NavCubeMode extends Controller {
