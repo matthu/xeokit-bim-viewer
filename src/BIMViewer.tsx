@@ -493,6 +493,14 @@ export class BIMViewer extends React.Component<Props> {
             this.fire("queryNotPicked", true);
         });
 
+        this._queryTool.on("objectSelected", (objectId: string) => {
+          this.showObjectPropertes(objectId);
+        });
+
+        this._selectionTool.on("objectSelected", (objectId: string) => {
+          this.showObjectPropertes(objectId);
+        });
+
         this._resetAction.on("reset", () => {
             this.fire("reset", true);
         });
@@ -719,50 +727,8 @@ export class BIMViewer extends React.Component<Props> {
                         this.showObjectInExplorers(objectId);
                     },
                     showObjectProperties: (objectId: any) => {
-                      // this.getObjectInfo("WestRiversideHospital", "architectural", "2HaS6zNOX8xOGjmaNi_r6b",
-                      //   (objectInfo: any) => {
-                      //       console.log(JSON.stringify(objectInfo, null, "\t"));
-                      //   },
-                      //   (errMsg: string) => {
-                      //       console.log("Oops! There was an error getting info for this object: " + errMsg);
-                      //   }
-                      // );
-                      const objectProperties: ObjectProperties = {
-                        id: objectId,
-                        hierarchy: null,
-                        modelAuthor: null,
-                        modelCreatedApp: null,
-                        modelCreatedAt: null,
-                        modelId: null,
-                        modelRevisionId: null,
-                        name: null,
-                        projectId: null,
-                        type: null,
-                      }
-                      if (this.viewer.metaScene.metaObjects[objectId]) {
-                        const object = this.viewer.metaScene.metaObjects[objectId];
-                        objectProperties.type = object.type;
-                        objectProperties.name = object.name;
-                        objectProperties.projectId = object.metaModel.projectId.toString();
-                        objectProperties.modelRevisionId = object.metaModel.revisionId.toString();
-                        objectProperties.modelId = object.metaModel.id as string;
-                        objectProperties.modelAuthor = object.metaModel.author;
-                        objectProperties.modelCreatedAt = object.metaModel.createdAt;
-                        objectProperties.modelCreatedApp = object.metaModel.creatingApplication;
-                        const hierarchy: string[] = [object.name];
-                        let parent = object.parent;
-                        while (parent != null) {
-                          if (parent.name && parent.name != "Default") {
-                            hierarchy.push(parent.name);
-                          } else if (parent.type) {
-                            hierarchy.push(parent.type);
-                          }
-                          parent = parent.parent;
-                        }
-                        objectProperties.hierarchy = hierarchy.reverse();
-                      }
-                      this.setState({showObjectProperties: objectProperties});
-                  },
+                      this.showObjectPropertes(objectId);
+                    },
                     entity: hit.entity
                 };
                 this._objectContextMenu.show(event.pageX, event.pageY);
@@ -2436,26 +2402,67 @@ export class BIMViewer extends React.Component<Props> {
       this._children = [];
   }
 
+  /**
+   * Show object properties in the pane
+   */
+  showObjectPropertes(objectId: string) {
+    const objectProperties: ObjectProperties = {
+      id: objectId,
+      hierarchy: null,
+      modelAuthor: null,
+      modelCreatedApp: null,
+      modelCreatedAt: null,
+      modelId: null,
+      modelRevisionId: null,
+      name: null,
+      projectId: null,
+      type: null,
+    };
+    if (this.viewer.metaScene.metaObjects[objectId]) {
+      const object = this.viewer.metaScene.metaObjects[objectId];
+      objectProperties.type = object.type;
+      objectProperties.name = object.name;
+      objectProperties.projectId = object.metaModel.projectId.toString();
+      objectProperties.modelRevisionId = object.metaModel.revisionId.toString();
+      objectProperties.modelId = object.metaModel.id as string;
+      objectProperties.modelAuthor = object.metaModel.author;
+      objectProperties.modelCreatedAt = object.metaModel.createdAt;
+      objectProperties.modelCreatedApp = object.metaModel.creatingApplication;
+      const hierarchy: string[] = [object.name];
+      let parent = object.parent;
+      while (parent != null) {
+        if (parent.name && parent.name != "Default") {
+          hierarchy.push(parent.name);
+        } else if (parent.type) {
+          hierarchy.push(parent.type);
+        }
+        parent = parent.parent;
+      }
+      objectProperties.hierarchy = hierarchy.reverse();
+    }
+    this.setState({showObjectProperties: objectProperties});
+  }
+
   public render() {
     const { classes } = this.props;
     return (
       <>
-        { this.state.showObjectProperties != null &&
+        {/* { this.state.showObjectProperties != null &&
           <ConfirmationDialog
             title="Object Properties"
             continueText="Okay"
             centered
             content={<>
-              <div className={classes.dialogRow}><div className={classes.dialogLabel}>ID:</div><div className={classes.dialogValue}>{this.state.showObjectProperties.id}</div></div>
-              <div className={classes.dialogRow}><div className={classes.dialogLabel}>Name:</div><div className={classes.dialogValue}>{this.state.showObjectProperties.name ?? 'None'}</div></div>
-              <div className={classes.dialogRow}><div className={classes.dialogLabel}>Type:</div><div className={classes.dialogValue}>{this.state.showObjectProperties.type ?? 'None'}</div></div>
-              <div className={classes.dialogRow}><div className={classes.dialogLabel}>Hierarchy:</div><div className={classes.dialogValue}>{this.state.showObjectProperties.hierarchy ? this.state.showObjectProperties.hierarchy.join(' > ') : 'None'}</div></div>
-              <div className={classes.dialogRow}><div className={classes.dialogLabel}>Project ID:</div><div className={classes.dialogValue}>{this.state.showObjectProperties.projectId ?? 'None'}</div></div>
-              <div className={classes.dialogRow}><div className={classes.dialogLabel}>Model ID:</div><div className={classes.dialogValue}>{this.state.showObjectProperties.modelId ?? 'None'}</div></div>
-              <div className={classes.dialogRow}><div className={classes.dialogLabel}>Model Revision ID:</div><div className={classes.dialogValue}>{this.state.showObjectProperties.modelRevisionId ?? 'None'}</div></div>
-              <div className={classes.dialogRow}><div className={classes.dialogLabel}>Model Author:</div><div className={classes.dialogValue}>{this.state.showObjectProperties.modelAuthor ?? 'None'}</div></div>
-              <div className={classes.dialogRow}><div className={classes.dialogLabel}>Model Created:</div><div className={classes.dialogValue}>{this.state.showObjectProperties.modelCreatedAt ?? 'None'}</div></div>
-              <div className={classes.dialogRow}><div className={classes.dialogLabel}>Model Creation App:</div><div className={classes.dialogValue}>{this.state.showObjectProperties.modelCreatedApp ?? 'None'}</div></div>
+              <div className={classes.textRow}><div className={classes.textLabel}>ID:</div><div className={classes.textValue}>{this.state.showObjectProperties.id}</div></div>
+              <div className={classes.textRow}><div className={classes.textLabel}>Name:</div><div className={classes.textValue}>{this.state.showObjectProperties.name ?? 'None'}</div></div>
+              <div className={classes.textRow}><div className={classes.textLabel}>Type:</div><div className={classes.textValue}>{this.state.showObjectProperties.type ?? 'None'}</div></div>
+              <div className={classes.textRow}><div className={classes.textLabel}>Hierarchy:</div><div className={classes.textValue}>{this.state.showObjectProperties.hierarchy ? this.state.showObjectProperties.hierarchy.join(' > ') : 'None'}</div></div>
+              <div className={classes.textRow}><div className={classes.textLabel}>Project ID:</div><div className={classes.textValue}>{this.state.showObjectProperties.projectId ?? 'None'}</div></div>
+              <div className={classes.textRow}><div className={classes.textLabel}>Model ID:</div><div className={classes.textValue}>{this.state.showObjectProperties.modelId ?? 'None'}</div></div>
+              <div className={classes.textRow}><div className={classes.textLabel}>Model Revision ID:</div><div className={classes.textValue}>{this.state.showObjectProperties.modelRevisionId ?? 'None'}</div></div>
+              <div className={classes.textRow}><div className={classes.textLabel}>Model Author:</div><div className={classes.textValue}>{this.state.showObjectProperties.modelAuthor ?? 'None'}</div></div>
+              <div className={classes.textRow}><div className={classes.textLabel}>Model Created:</div><div className={classes.textValue}>{this.state.showObjectProperties.modelCreatedAt ?? 'None'}</div></div>
+              <div className={classes.textRow}><div className={classes.textLabel}>Model Creation App:</div><div className={classes.textValue}>{this.state.showObjectProperties.modelCreatedApp ?? 'None'}</div></div>
             </>}
             onClose={() => {
               this.setState({showObjectProperties: null});
@@ -2464,10 +2471,10 @@ export class BIMViewer extends React.Component<Props> {
               this.setState({showObjectProperties: null});
             }}
           />
-        }
+        } */}
         <div id="myViewer" className="xeokit-busy-modal-backdrop" ref={this.busyModelBackdropElementRef}>
           <SplitPane
-            className={classes.splitPane}
+            className={classes.explorerSidePane}
             style={
               {
                 position: 'relative' as 'relative',
@@ -2476,67 +2483,97 @@ export class BIMViewer extends React.Component<Props> {
             split="vertical"
             primary="first"
             minSize={400}
-            defaultSize={localStorage.getItem('splitPos') ? parseInt(localStorage.getItem('splitPos'), 10) : '20%'}
-            onChange={(size) => localStorage.setItem('splitPos', size.toString())}
+            defaultSize={localStorage.getItem('paneWidth') ? parseInt(localStorage.getItem('paneWidth'), 10) : '20%'}
+            onChange={(size) => localStorage.setItem('paneWidth', size.toString())}
           >
             <div id="myExplorer" className={classes.myExplorer} ref={this.explorerElementRef}>
-              <div className="xeokit-tabs">
-                { this.viewer != null &&
-                  <>
-                    <ModelsExplorerComponent
-                      modelsInfo={this._modelsInfo}
-                      activeTab={this.state.activeTab === "models"}
-                      bimViewer={this}
-                      viewer={this.viewer}
-                      server={this.server}
-                      numModelsLoaded={this._numModelsLoaded}
-                      enableEditModels={this._enableAddModels}
-                      ref={this.modelsExplorerRef}
-                      loadModel={this.loadModel}
-                      unloadModel={this.unloadModel}
-                      error={this.error}
-                      destroy={() => {this.destroy()}}
-                      loadAll={this.handleLoadAllModels}
-                      unloadAll={this.handleUnloadAllModels}
-                      addModel={this.handleAddModel}
-                      setActiveTab={() => this.handleSetTab("models")}
-                    />
-                    <ObjectsExplorerComponent
-                      activeTab={this.state.activeTab === "objects"}
-                      bimViewer={this}
-                      viewer={this.viewer}
-                      ref={this.objectsExplorerRef}
-                      error={this.error}
-                      destroy={() => {this.destroy()}}
-                      showAll={this.handleShowAllObjects}
-                      hideAll={this.handleHideAllObjects}
-                      setActiveTab={() => this.handleSetTab("objects")}
-                    />
-                    <ClassesExplorerComponent
-                      activeTab={this.state.activeTab === "classes"}
-                      bimViewer={this}
-                      viewer={this.viewer}
-                      ref={this.classesExplorerRef}
-                      error={this.error}
-                      destroy={() => {this.destroy()}}
-                      showAll={this.handleShowAllObjects}
-                      hideAll={this.handleHideAllObjects}
-                      setActiveTab={() => this.handleSetTab("classes")}
-                    />
-                    <StoreysExplorerComponent
-                      activeTab={this.state.activeTab === "storeys"}
-                      bimViewer={this}
-                      viewer={this.viewer}
-                      ref={this.storeysExplorerRef}
-                      error={this.error}
-                      destroy={() => {this.destroy()}}
-                      showAll={this.handleShowAllObjects}
-                      hideAll={this.handleHideAllObjects}
-                      setActiveTab={() => this.handleSetTab("storeys")}
-                    />
-                  </>
+              <SplitPane
+                className={classes.explorerSubPane}
+                style={
+                  {
+                    position: 'relative' as 'relative',
+                  } as React.CSSProperties
                 }
-              </div>
+                split="horizontal"
+                primary="second"
+                defaultSize={localStorage.getItem('objectPropertyHeight') ? parseInt(localStorage.getItem('objectPropertyHeight'), 10) : '200px'}
+                onChange={(size) => localStorage.setItem('objectPropertyHeight', size.toString())}
+              >
+                <div className="xeokit-tabs">
+                  { this.viewer != null &&
+                    <>
+                      <ModelsExplorerComponent
+                        modelsInfo={this._modelsInfo}
+                        activeTab={this.state.activeTab === "models"}
+                        bimViewer={this}
+                        viewer={this.viewer}
+                        server={this.server}
+                        numModelsLoaded={this._numModelsLoaded}
+                        enableEditModels={this._enableAddModels}
+                        ref={this.modelsExplorerRef}
+                        loadModel={this.loadModel}
+                        unloadModel={this.unloadModel}
+                        error={this.error}
+                        destroy={() => {this.destroy()}}
+                        loadAll={this.handleLoadAllModels}
+                        unloadAll={this.handleUnloadAllModels}
+                        addModel={this.handleAddModel}
+                        setActiveTab={() => this.handleSetTab("models")}
+                      />
+                      <ObjectsExplorerComponent
+                        activeTab={this.state.activeTab === "objects"}
+                        bimViewer={this}
+                        viewer={this.viewer}
+                        ref={this.objectsExplorerRef}
+                        error={this.error}
+                        destroy={() => {this.destroy()}}
+                        showAll={this.handleShowAllObjects}
+                        hideAll={this.handleHideAllObjects}
+                        setActiveTab={() => this.handleSetTab("objects")}
+                      />
+                      <ClassesExplorerComponent
+                        activeTab={this.state.activeTab === "classes"}
+                        bimViewer={this}
+                        viewer={this.viewer}
+                        ref={this.classesExplorerRef}
+                        error={this.error}
+                        destroy={() => {this.destroy()}}
+                        showAll={this.handleShowAllObjects}
+                        hideAll={this.handleHideAllObjects}
+                        setActiveTab={() => this.handleSetTab("classes")}
+                      />
+                      <StoreysExplorerComponent
+                        activeTab={this.state.activeTab === "storeys"}
+                        bimViewer={this}
+                        viewer={this.viewer}
+                        ref={this.storeysExplorerRef}
+                        error={this.error}
+                        destroy={() => {this.destroy()}}
+                        showAll={this.handleShowAllObjects}
+                        hideAll={this.handleHideAllObjects}
+                        setActiveTab={() => this.handleSetTab("storeys")}
+                      />
+                    </>
+                  }
+                </div>
+                <div>
+                  <div className={classes.textTitle}><b>Object Properties:</b></div>
+                  { this.state.showObjectProperties &&
+                    <>
+                      <div className={classes.textRow}><div className={classes.textLabel}>ID:</div><div className={classes.textValue}>{this.state.showObjectProperties.id}</div></div>
+                      <div className={classes.textRow}><div className={classes.textLabel}>Name:</div><div className={classes.textValue}>{this.state.showObjectProperties.name ?? 'None'}</div></div>
+                      <div className={classes.textRow}><div className={classes.textLabel}>Type:</div><div className={classes.textValue}>{this.state.showObjectProperties.type ?? 'None'}</div></div>
+                      <div className={classes.textRow}><div className={classes.textLabel}>Hierarchy:</div><div className={classes.textValue}>{this.state.showObjectProperties.hierarchy ? this.state.showObjectProperties.hierarchy.join(' > ') : 'None'}</div></div>
+                      <div className={classes.textRow}><div className={classes.textLabel}>Project ID:</div><div className={classes.textValue}>{this.state.showObjectProperties.projectId ?? 'None'}</div></div>
+                      <div className={classes.textRow}><div className={classes.textLabel}>Model ID:</div><div className={classes.textValue}>{this.state.showObjectProperties.modelId ?? 'None'}</div></div>
+                      <div className={classes.textRow}><div className={classes.textLabel}>Model Revision ID:</div><div className={classes.textValue}>{this.state.showObjectProperties.modelRevisionId ?? 'None'}</div></div>
+                      <div className={classes.textRow}><div className={classes.textLabel}>Model Author:</div><div className={classes.textValue}>{this.state.showObjectProperties.modelAuthor ?? 'None'}</div></div>
+                      <div className={classes.textRow}><div className={classes.textLabel}>Model Created:</div><div className={classes.textValue}>{this.state.showObjectProperties.modelCreatedAt ?? 'None'}</div></div>
+                      <div className={classes.textRow}><div className={classes.textLabel}>Model Creation App:</div><div className={classes.textValue}>{this.state.showObjectProperties.modelCreatedApp ?? 'None'}</div></div>
+                    </>
+                  }
+                </div>
+              </SplitPane>
             </div>
             <div id="myContent" className={classes.myContent}>
               <div id="myToolbar" ref={this.toolbarElementRef}>
@@ -2601,9 +2638,9 @@ const styles = () => ({
     display: 'flex',
     flexDirection: 'column' as 'column',
   },
-  splitPane: {
+  explorerSidePane: {
     height: '100%',
-    '& .Pane': {
+    '& > .Pane': {
       display: 'flex',
       overflow: 'auto',
       minWidth: '400px'
@@ -2667,6 +2704,51 @@ const styles = () => ({
     display: 'flex',
     flexDirection: 'column' as 'column'
   },
+  explorerSubPane: {
+    height: '100%',
+    '& > .Pane': {
+      display: 'flex',
+      overflow: 'auto'
+    },
+    '& .Resizer': {
+      background: '#6d6d6d',
+      opacity: 0.2,
+      zIndex: 1,
+      MozBoxSizing: 'border-box' as 'border-box',
+      WebkitBoxSizing: 'border-box' as 'border-box',
+      boxSizing: 'border-box' as 'border-box',
+      MozBackgroundClip: 'padding',
+      WebkitBackgroundClip: 'padding',
+      backgroundClip: 'padding-box'
+    },
+    '& .Resizer:hover': {
+      WebkitTransition: 'all 2s ease',
+      transition: 'all 2s ease'
+    },
+    '& .Resizer.vertical': {
+      width: '11px',
+      margin: '0 -5px',
+      borderLeft: '4px solid rgba(255, 255, 255, 0)',
+      borderRight: '4px solid rgba(255, 255, 255, 0)',
+      cursor: 'col-resize'
+    },
+    '& .Resizer.vertical:hover': {
+      borderLeft: '4px solid rgba(0, 0, 0, 0.5)',
+      borderRight: '4px solid rgba(0, 0, 0, 0.5)'
+    },
+    '& .Resizer.horizontal': {
+      height: '11px',
+      margin: '-5px 0px',
+      borderTop: '4px solid rgba(255, 255, 255, 0)',
+      borderBottom: '4px solid rgba(255, 255, 255, 0)',
+      cursor: 'row-resize',
+      width: '100%'
+    },
+    '& .Resizer.horizontal:hover': {
+      borderTop: '4px solid rgba(0, 0, 0, 0.5)',
+      borderBottom: '4px solid rgba(0, 0, 0, 0.5)'
+    }
+  },
   myExplorer: {
     width: '100%',
     height: '100%',
@@ -2722,18 +2804,23 @@ const styles = () => ({
     height: '100%',
     background: '#f2f2f2',
   },
-  dialogRow: {
+  textTitle: {
+    paddingTop: '10px',
     paddingBottom: '10px',
   },
-  dialogLabel: {
-    minWidth: '150px',
+  textRow: {
+    paddingBottom: '5px',
+  },
+  textLabel: {
+    width: '40%',
     fontWeight: 'bold' as 'bold',
     display: 'inline-block',
     verticalAlign: 'top',
   },
-  dialogValue: {
+  textValue: {
     display: 'inline-block',
-    maxWidth: '60%',
+    width: '60%',
+    wordBreak: 'break-word' as 'break-word',
   },
 });
 

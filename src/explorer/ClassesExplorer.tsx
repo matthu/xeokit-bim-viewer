@@ -1,75 +1,11 @@
 import * as React from 'react';
-import { withStyles, WithStyles } from '@material-ui/core/styles';
+import { Theme, withStyles, WithStyles } from '@material-ui/core/styles';
 import { TreeViewContextMenu } from "../contextMenus/TreeViewContextMenu";
 import { Controller } from "../Controller";
 import { BIMViewer } from '../BIMViewer';
 import { Viewer } from '../xeokit-sdk/viewer/Viewer';
 import { TreeViewPlugin } from '../xeokit-sdk/plugins/TreeViewPlugin/TreeViewPlugin';
-
-const styles = () => ({
-  root: {
-  },
-  classesTab: {
-    '& ul': {
-      listStyle: 'none',
-      paddingLeft: '1.75em',
-    },
-    '& ul li': {
-      margin: '2px 0',
-      position: 'relative',
-      lineHeight: '3ex',
-    },
-    '& ul li a': {
-      backgroundColor: '#eee',
-      borderRadius: '50%',
-      color: '#000',
-      display: 'inline-block',
-      height: '1.5em',
-      left: '-1.5em',
-      position: 'absolute',
-      textAlign: 'center',
-      textDecoration: 'none',
-      width: '1.5em',
-    },
-    '& ul li a.plus': {
-      backgroundColor: '#ded',
-    },
-    '& ul li a.minus': {
-      backgroundColor: '#eee',
-    },
-    '& ul li a:active': {
-      top: '1px',
-    },
-    '& ul li input': {
-      verticalAlign: 'middle',
-    },
-    '& ul li span': {
-      display: 'inline-block',
-      paddingLeft: '2px',
-      verticalAlign: 'middle',
-    },
-    'ul li span:hover': {
-      color: 'white',
-      cursor: 'pointer',
-      background: 'rgba(255, 255, 255, 0.2)',
-      paddingLeft: '2px',
-      verticalAlign: 'middle',
-    },
-    '& .top-right': {
-      fontSize: 'small',
-      position: 'fixed',
-      right: '1em',
-      top: '1em',
-    },
-    '& .highlighted-node': { /* Appearance of node highlighted with BIMViewer#showObjectInExplorers() */
-      border: 'black solid 1px',
-      background: 'yellow',
-      color: 'black',
-      paddingLeft: '1px',
-      paddingRight: '5px',
-    },
-  }
-});
+import { Button, ButtonGroup } from '@material-ui/core';
 
 interface Props extends WithStyles<typeof styles> {
   ref: any;
@@ -253,15 +189,116 @@ export class ClassesExplorer extends React.Component<Props> {
         <div className={classes.classesTab + " xeokit-tab" + (this.props.activeTab ? " active" : "") + (this.state.tabEnabled ? "" : " disabled")}>
           <a className="xeokit-tab-btn" href="#" onClick={this.handleSetActiveTab}>Classes</a>
           <div className="xeokit-tab-content">
-            <div className="xeokit-btn-group">
-              <button type="button" className={"xeokit-showAllClasses xeokit-btn" + (this.state.showClassesEnabled ? "" : " disabled")} data-tippy-content="Show all classes" onClick={this.props.showAll}>Show all</button>
-              <button type="button" className={"xeokit-hideAllClasses xeokit-btn" + (this.state.hideClassesEnabled ? "" : " disabled")} data-tippy-content="Hide all classes" onClick={this.props.hideAll}>Hide all</button>
-            </div>
+            <ButtonGroup
+              color="default"
+              className={classes.buttonGroup}
+            >
+              <Button
+                variant="contained"
+                onClick={this.props.showAll}
+                className={classes.button}
+                disabled={!this.state.showClassesEnabled}
+              >
+                Show All
+              </Button>
+              <Button
+                variant="contained"
+                onClick={this.props.hideAll}
+                className={classes.button}
+                disabled={!this.state.hideClassesEnabled}
+              >
+                Hide All
+              </Button>
+            </ButtonGroup>
             <div className="xeokit-classes xeokit-tree-panel" ref={this.modelsRef}></div>
           </div>
         </div>
       );
     }
 }
+
+const styles = (theme: Theme) => ({
+  root: {
+  },
+  classesTab: {
+    '& ul': {
+      listStyle: 'none',
+      paddingLeft: '1.75em',
+    },
+    '& ul li': {
+      margin: '2px 0',
+      position: 'relative',
+      lineHeight: '3ex',
+    },
+    '& ul li a': {
+      backgroundColor: '#eee',
+      borderRadius: '50%',
+      color: '#000',
+      display: 'inline-block',
+      height: '1.5em',
+      left: '-1.5em',
+      position: 'absolute',
+      textAlign: 'center',
+      textDecoration: 'none',
+      width: '1.5em',
+    },
+    '& ul li a.plus': {
+      backgroundColor: '#ded',
+    },
+    '& ul li a.minus': {
+      backgroundColor: '#eee',
+    },
+    '& ul li a:active': {
+      top: '1px',
+    },
+    '& ul li input': {
+      verticalAlign: 'middle',
+    },
+    '& ul li span': {
+      display: 'inline-block',
+      paddingLeft: '2px',
+      verticalAlign: 'middle',
+    },
+    'ul li span:hover': {
+      color: 'white',
+      cursor: 'pointer',
+      background: 'rgba(255, 255, 255, 0.2)',
+      paddingLeft: '2px',
+      verticalAlign: 'middle',
+    },
+    '& .top-right': {
+      fontSize: 'small',
+      position: 'fixed',
+      right: '1em',
+      top: '1em',
+    },
+    '& .highlighted-node': { /* Appearance of node highlighted with BIMViewer#showObjectInExplorers() */
+      border: 'black solid 1px',
+      background: 'yellow',
+      color: 'black',
+      paddingLeft: '1px',
+      paddingRight: '5px',
+    },
+  },
+  buttonGroup: {
+    margin: '0px 10px 10px 10px',
+  },
+  button: {
+    color: theme.palette.primary.main,
+    backgroundColor: 'white',
+    '&:hover': {
+      color: theme.palette.secondary.main,
+      backgroundColor: 'white',
+    }
+  },
+  selectedButton: {
+    color: 'white',
+    backgroundColor: theme.palette.secondary.main,
+    '&:hover': {
+      color: 'white',
+      backgroundColor: theme.palette.secondary.main,
+    }
+  },
+});
 
 export default withStyles(styles)(ClassesExplorer);

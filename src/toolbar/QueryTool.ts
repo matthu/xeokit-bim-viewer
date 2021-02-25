@@ -105,6 +105,8 @@ class QueryTool extends Controller {
                     entity = null;
                     return;
                 }
+                this.fire("objectSelected", entity.id);
+
                 const model = entity.model;
                 if (!model) { // OK to click on entities that don't belong to models - could be a navigation gizmo or helper
                     return;

@@ -1,10 +1,11 @@
 import * as React from 'react';
-import { withStyles, WithStyles } from '@material-ui/core/styles';
+import { Theme, withStyles, WithStyles } from '@material-ui/core/styles';
 import { TreeViewContextMenu } from "../contextMenus/TreeViewContextMenu";
 import { Controller } from "../Controller";
 import { BIMViewer } from '../BIMViewer';
 import { Viewer } from '../xeokit-sdk/viewer/Viewer';
 import { TreeViewPlugin } from '../xeokit-sdk/plugins/TreeViewPlugin/TreeViewPlugin';
+import { Button, ButtonGroup } from '@material-ui/core';
 
 interface Props extends WithStyles<typeof styles> {
   ref: any;
@@ -192,10 +193,27 @@ export class ObjectsExplorer extends React.Component<Props> {
         <div className={classes.objectsTab + " xeokit-tab" + (this.props.activeTab ? " active" : "") + (this.state.tabEnabled ? "" : " disabled")}>
           <a className="xeokit-tab-btn" href="#" onClick={this.handleSetActiveTab}>Objects</a>
           <div className="xeokit-tab-content">
-            <div className="xeokit-btn-group">
-              <button type="button" className={"xeokit-showAllObjects xeokit-btn" + (this.state.showObjectsEnabled ? "" : " disabled")} data-tippy-content="Show all objects" onClick={this.props.showAll}>Show all</button>
-              <button type="button" className={"xeokit-hideAllObjects xeokit-btn" + (this.state.hideObjectsEnabled ? "" : " disabled")} data-tippy-content="Hide all objects" onClick={this.props.hideAll}>Hide all</button>
-            </div>
+            <ButtonGroup
+              color="default"
+              className={classes.buttonGroup}
+            >
+              <Button
+                variant="contained"
+                onClick={this.props.showAll}
+                className={classes.button}
+                disabled={!this.state.showObjectsEnabled}
+              >
+                Show All
+              </Button>
+              <Button
+                variant="contained"
+                onClick={this.props.hideAll}
+                className={classes.button}
+                disabled={!this.state.hideObjectsEnabled}
+              >
+                Hide All
+              </Button>
+            </ButtonGroup>
             <div className="xeokit-objects xeokit-tree-panel" ref={this.modelsRef}></div>
           </div>
         </div>
@@ -203,7 +221,7 @@ export class ObjectsExplorer extends React.Component<Props> {
     }
 }
 
-const styles = () => ({
+const styles = (theme: Theme) => ({
   root: {
   },
   objectsTab: {
@@ -265,7 +283,26 @@ const styles = () => ({
       paddingLeft: '1px',
       paddingRight: '5px',
     }
-  }
+  },
+  buttonGroup: {
+    margin: '0px 10px 10px 10px',
+  },
+  button: {
+    color: theme.palette.primary.main,
+    backgroundColor: 'white',
+    '&:hover': {
+      color: theme.palette.secondary.main,
+      backgroundColor: 'white',
+    }
+  },
+  selectedButton: {
+    color: 'white',
+    backgroundColor: theme.palette.secondary.main,
+    '&:hover': {
+      color: 'white',
+      backgroundColor: theme.palette.secondary.main,
+    }
+  },
 });
 
 export default withStyles(styles)(ObjectsExplorer);

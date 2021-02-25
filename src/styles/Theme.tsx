@@ -8,9 +8,9 @@ export const styleTheme = createMuiTheme({
       main: '#03103F',
     },
     secondary: {
-      light: '#ffff98',
-      main: '#efdd5f',
-      dark: '#c5b32c',
+      light: '#477dca',
+      main: '#477dca',
+      dark: '#477dca',
     },
     background: {
       default: '#fff',
@@ -19,7 +19,7 @@ export const styleTheme = createMuiTheme({
       primary: '#333',
       secondary: '#707070',
     },
-    type: 'light',
+    type: 'dark',
   },
   typography: {
     // Component titles

@@ -108,6 +108,8 @@ class SelectionTool extends Controller {
                     entity = null;
                     return;
                 }
+                this.fire("objectSelected", entity.id);
+
                 entity.selected = !entity.selected;
                 entity = null;
             }

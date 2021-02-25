@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { withStyles, WithStyles } from '@material-ui/core/styles';
+import { Theme, withStyles, WithStyles } from '@material-ui/core/styles';
 
 import { BIMViewer, ViewerConfig, ViewerContent, ViewerInfo, ViewerInfoModel, ViewerState } from '../BIMViewer';
 import { ModelsContextMenu } from "../contextMenus/ModelsContextMenu";
@@ -7,6 +7,7 @@ import { Controller } from "../Controller";
 
 import { Server } from '../server/Server';
 import { Viewer } from '../xeokit-sdk/viewer/Viewer';
+import { Button, ButtonGroup } from '@material-ui/core';
 
 interface Props extends WithStyles<typeof styles> {
   ref: any;
@@ -174,13 +175,37 @@ export class ModelsExplorer extends React.Component<Props> {
         <div className={classes.modelsTab + " xeokit-tab" + (this.props.activeTab ? " active" : "") + (this.state.tabEnabled ? "" : " disabled")} >
           <a className="xeokit-tab-btn" onClick={this.handleSetActiveTab} href="#">Models</a>
           <div className="xeokit-tab-content">
-            <div className="xeokit-btn-group">
-              <button type="button" className={"xeokit-loadAllModels xeokit-btn" + (this.state.loadModelsEnabled ? "" : " disabled")} data-tippy-content="Load all models" onClick={this.props.loadAll}>Load all</button>
-              <button type="button" className={"xeokit-unloadAllModels xeokit-btn" + (this.state.unloadModelsEnabled ? "" : " disabled")} data-tippy-content="Unload all models" onClick={this.props.unloadAll}>Unload all</button>
-              { this.props.enableEditModels ? 
-                <button type="button" className={"xeokit-addModel xeokit-btn" + (this.state.addModelEnabled ? "" : " disabled")} data-tippy-content="Add model" onClick={this.props.addModel}>Add</button> : ''
-              }
-            </div>
+            <ButtonGroup
+              color="default"
+              className={classes.buttonGroup}
+            >
+              <Button
+                variant="contained"
+                onClick={this.props.loadAll}
+                className={classes.button}
+                disabled={!this.state.loadModelsEnabled}
+              >
+                Load All
+              </Button>
+              <Button
+                variant="contained"
+                onClick={this.props.unloadAll}
+                className={classes.button}
+                disabled={!this.state.unloadModelsEnabled}
+              >
+                Unload All
+              </Button>
+            </ButtonGroup>
+            { this.props.enableEditModels &&
+              <Button
+                variant="contained"
+                onClick={this.props.addModel}
+                className={classes.button}
+                disabled={!this.state.addModelEnabled}
+              >
+                Add
+              </Button>
+            }
             <div className="xeokit-models" ref={this.modelsRef}></div>
           </div>
         </div>
@@ -188,7 +213,7 @@ export class ModelsExplorer extends React.Component<Props> {
     }
 }
 
-const styles = () => ({
+const styles = (theme: Theme) => ({
   root: {
   },
   modelsTab: {
@@ -222,7 +247,26 @@ const styles = () => ({
       backgroundColor: '#03103F',
       cursor: 'default',
     }
-  }
+  },
+  buttonGroup: {
+    margin: '0px 10px 10px 10px',
+  },
+  button: {
+    color: theme.palette.primary.main,
+    backgroundColor: 'white',
+    '&:hover': {
+      color: theme.palette.secondary.main,
+      backgroundColor: 'white',
+    }
+  },
+  selectedButton: {
+    color: 'white',
+    backgroundColor: theme.palette.secondary.main,
+    '&:hover': {
+      color: 'white',
+      backgroundColor: theme.palette.secondary.main,
+    }
+  },
 });
 
 export default withStyles(styles)(ModelsExplorer);

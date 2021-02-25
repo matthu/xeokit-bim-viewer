@@ -1,11 +1,15 @@
 import * as React from 'react';
-import { withStyles, WithStyles } from '@material-ui/core/styles';
+import { Theme, withStyles, WithStyles } from '@material-ui/core/styles';
 import { TreeViewContextMenu } from "../contextMenus/TreeViewContextMenu";
 import { Controller } from "../Controller";
 import { BIMViewer } from '../BIMViewer';
 import { math } from '../xeokit-sdk/viewer/scene/math/math';
 import { Viewer } from '../xeokit-sdk/viewer/Viewer';
 import { TreeViewPlugin } from '../xeokit-sdk/plugins/TreeViewPlugin/TreeViewPlugin';
+import { Button, ButtonGroup, List, ListItem } from '@material-ui/core';
+import { StoreyViewsPlugin } from '../xeokit-sdk/plugins/StoreyViewsPlugin/StoreyViewsPlugin';
+import { MetaObject } from '../xeokit-sdk/viewer/metadata/MetaObject';
+import { Entity } from '../xeokit-sdk/viewer/scene/Entity';
 
 const tempVec3 = math.vec3();
 
@@ -28,6 +32,8 @@ export class StoreysExplorer extends React.Component<Props> {
       tabEnabled: boolean;
       showStoreysEnabled: boolean;
       hideStoreysEnabled: boolean;
+      selectedStorey: string;
+      advancedMode: boolean;
     };
 
     // _storeysTabElement: Element;
@@ -37,6 +43,7 @@ export class StoreysExplorer extends React.Component<Props> {
 
     _treeView: TreeViewPlugin;
     _treeViewContextMenu: TreeViewContextMenu;
+    _storeyViewsPlugin: StoreyViewsPlugin;
 
     _onModelLoaded: any;
     _onModelUnloaded: any;
@@ -80,10 +87,14 @@ export class StoreysExplorer extends React.Component<Props> {
           tabEnabled: true,
           showStoreysEnabled: true,
           hideStoreysEnabled: true,
+          selectedStorey: null,
+          advancedMode: false,
         };
     }
 
     public componentDidMount() {
+        this._storeyViewsPlugin = new StoreyViewsPlugin(this.props.viewer);
+
         this._treeView = new TreeViewPlugin(this.props.viewer, {
             containerElement: this.modelsRef.current,
             autoAddModels: false,
@@ -144,6 +155,25 @@ export class StoreysExplorer extends React.Component<Props> {
             this._treeView.collapse();
             this._treeView.expandToDepth(1);
         });
+    }
+
+    /**
+     * Get all storeys for the model
+     *   Since there can be multiple storey objects for each level, aggregate
+     */
+    getStoreys(): {[name: string]: string[]} {
+      const storeys: {[name: string]: string[]} = {};
+      if (this.props.viewer.metaScene.metaObjectsByType["IfcBuildingStorey"]) {
+        for (const objectId in this.props.viewer.metaScene.metaObjectsByType["IfcBuildingStorey"]) {
+          const name = this.props.viewer.metaScene.metaObjectsByType["IfcBuildingStorey"][objectId].name;
+          if (storeys[name]) {
+            storeys[name].push(objectId);
+          } else {
+            storeys[name] = [objectId];
+          }
+        }
+      }
+      return storeys;
     }
 
     setEnabled(enabled: boolean) {
@@ -240,29 +270,110 @@ export class StoreysExplorer extends React.Component<Props> {
         this.props.viewer.scene.off(this._onModelUnloaded);
     }
 
+    handleShowAll = (event: React.MouseEvent) => {
+      this.setState({selectedStorey: null});
+      this.props.showAll(event);
+    }
+
+    handleHideAll = (event: React.MouseEvent) => {
+      this.setState({selectedStorey: null});
+      this.props.hideAll(event);
+    }
+
     handleSetActiveTab = (event: React.MouseEvent) => {
       event.preventDefault();
       this.props.setActiveTab();
     }
 
+    /**
+     * Handle selecting a story
+     *   Since there can be multiple objects, hide others on the first, then show the remaining objects
+     * @param name
+     * @param objectIds
+     */
+    handleSelectStory = (name: string, objectIds: string[]) => {
+      if (objectIds.length > 0) {
+        for (const object of objectIds) {
+          this._storeyViewsPlugin.showStoreyObjects(object, {
+            hideOthers: object == objectIds[0],
+            useObjectStates: false
+          });
+        }
+      }
+      this.setState({selectedStorey: name})
+    }
+
     public render() {
       const { classes } = this.props;
+      const storeys = this.getStoreys();
       return (
         <div className={classes.storeysTab + " xeokit-tab" + (this.props.activeTab ? " active" : "") + (this.state.tabEnabled ? "" : " disabled")}>
           <a className="xeokit-tab-btn" href="#" onClick={this.handleSetActiveTab}>Storeys</a>
           <div className="xeokit-tab-content">
-            <div className="xeokit-btn-group">
-              <button type="button" className={"xeokit-showAllStoreys xeokit-btn" + (this.state.showStoreysEnabled ? "" : " disabled")} data-tippy-content="Show all storeys" onClick={this.props.showAll}>Show all</button>
-              <button type="button" className={"xeokit-hideAllStoreys xeokit-btn" + (this.state.hideStoreysEnabled ? "" : " disabled")} data-tippy-content="Hide all storeys" onClick={this.props.hideAll}>Hide all</button>
-            </div>
-            <div className="xeokit-storeys xeokit-tree-panel" ref={this.modelsRef}></div>
+            <ButtonGroup
+              color="default"
+              className={classes.buttonGroup}
+            >
+              <Button
+                variant="contained"
+                onClick={() => this.setState({advancedMode: false})}
+                className={this.state.advancedMode ? classes.button : classes.selectedButton}
+              >
+                Simple
+              </Button>
+              <Button
+                variant="contained"
+                onClick={() => this.setState({advancedMode: true})}
+                className={this.state.advancedMode ? classes.selectedButton : classes.button}
+              >
+                Advanced
+              </Button>
+            </ButtonGroup>
+            <ButtonGroup
+              color="default"
+              className={classes.buttonGroup}
+            >
+              <Button
+                variant="contained"
+                onClick={this.handleShowAll}
+                className={classes.button}
+                disabled={!this.state.showStoreysEnabled}
+              >
+                Show All
+              </Button>
+              <Button
+                variant="contained"
+                onClick={this.handleHideAll}
+                className={classes.button}
+                disabled={!this.state.hideStoreysEnabled}
+              >
+                Hide All
+              </Button>
+            </ButtonGroup>
+            <div className={'xeokit-storeys xeokit-tree-panel' + (this.state.advancedMode ? '' : ' hidden')} ref={this.modelsRef}></div>
+            { !this.state.advancedMode &&
+              <List
+                className={classes.storeyList}
+              >
+                { Object.keys(storeys).sort().map(name =>
+                  <ListItem
+                    key={storeys[name].join()}
+                    button
+                    selected={this.state.selectedStorey === name}
+                    onClick={() => this.handleSelectStory(name, storeys[name])}
+                  >
+                    {name}
+                  </ListItem>
+                )}
+              </List>
+            }
           </div>
         </div>
       );
     }
 }
 
-const styles = () => ({
+const styles = (theme: Theme) => ({
   root: {
   },
   storeysTab: {
@@ -322,8 +433,30 @@ const styles = () => ({
       color: 'black',
       paddingLeft: '1px',
       paddingRight: '5px',
+    },
+  },
+  storeyList: {
+    marginRight: '30px',
+  },
+  buttonGroup: {
+    margin: '0px 10px 10px 10px',
+  },
+  button: {
+    color: theme.palette.primary.main,
+    backgroundColor: 'white',
+    '&:hover': {
+      color: theme.palette.secondary.main,
+      backgroundColor: 'white',
     }
-  }
+  },
+  selectedButton: {
+    color: 'white',
+    backgroundColor: theme.palette.secondary.main,
+    '&:hover': {
+      color: 'white',
+      backgroundColor: theme.palette.secondary.main,
+    }
+  },
 });
 
 export default withStyles(styles)(StoreysExplorer);

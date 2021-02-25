@@ -44,7 +44,7 @@ export class MetaScene {
      *
      * @type {{String:MetaObject}}
      */
-    metaObjectsByType: {[id: string]: MetaObject};
+    metaObjectsByType: {[id: string]: {[id: string]: MetaObject}};
     /**
      * Tracks number of MetaObjects of each type.
      * @private
