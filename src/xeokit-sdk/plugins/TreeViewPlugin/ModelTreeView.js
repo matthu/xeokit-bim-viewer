@@ -577,7 +577,8 @@ class ModelTreeView {
         checkbox.checked = node.checked;
         checkbox.addEventListener("change", this._checkboxChangeHandler);
         nodeElement.appendChild(checkbox);
-        const span = document.createElement('span');
+        const span = document.createElement('label');
+        span.setAttribute("for", nodeId)
         span.textContent = node.title;
         nodeElement.appendChild(span);
         span.oncontextmenu = (e) => {
@@ -589,15 +590,15 @@ class ModelTreeView {
             });
             e.preventDefault();
         };
-        span.onclick = (e) => {
-            this._treeViewPlugin.fire("nodeTitleClicked", {
-                event: e,
-                viewer: this._viewer,
-                treeViewPlugin: this._treeViewPlugin,
-                treeViewNode: node
-            });
-            e.preventDefault();
-        };
+        // span.onclick = (e) => {
+        //     this._treeViewPlugin.fire("nodeTitleClicked", {
+        //         event: e,
+        //         viewer: this._viewer,
+        //         treeViewPlugin: this._treeViewPlugin,
+        //         treeViewNode: node
+        //     });
+        //     e.preventDefault();
+        // };
         return nodeElement;
     }
 

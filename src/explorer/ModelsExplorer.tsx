@@ -16,7 +16,7 @@ interface Props extends WithStyles<typeof styles> {
   viewer: Viewer;
   server: Server;
   numModelsLoaded: number;
-  modelsInfo: ViewerInfoModel[];
+  modelsInfo: {[id: string]: ViewerInfoModel};
   enableEditModels: boolean;
   loadModel(modelId: string): void;
   unloadModel(modelId: string): void;
@@ -25,7 +25,6 @@ interface Props extends WithStyles<typeof styles> {
   loadAll(event: React.MouseEvent): void;
   unloadAll(event: React.MouseEvent): void;
   addModel(event: React.MouseEvent): void;
-  setActiveTab(): void;
 }
 
 export class ModelsExplorer extends React.Component<Props> {
@@ -93,41 +92,42 @@ export class ModelsExplorer extends React.Component<Props> {
 
     public componentDidMount() {
       this._buildModelsMenu(this.props.modelsInfo)
-        
     }
 
     public componentDidUpdate(previousProps: Props) {
-      // Clear models pane when all unloaded
-      if (previousProps.numModelsLoaded !== 0 && this.props.numModelsLoaded === 0) {
-        this.modelsRef.current.innerHTML = "";
+      // Update loaded models
+      if (previousProps.numModelsLoaded != this.props.numModelsLoaded) {
+        for (const i of Object.keys(this.props.modelsInfo)) {
+          const modelInfo = this.props.modelsInfo[i];
+          const modelId = modelInfo.id;
+          const checkBox = document.getElementById(modelId);
+          if (checkBox) {
+            (checkBox as any).checked = this.props.viewer.scene.models[modelId];
+          }
+        }
       }
+      // Clear models pane when all unloaded
+      // if (previousProps.numModelsLoaded !== 0 && this.props.numModelsLoaded === 0) {
+      //   this.modelsRef.current.innerHTML = "";
+      // }
     }
 
-    _buildModelsMenu(modelsInfo: ViewerInfoModel[]) {
+    _buildModelsMenu(modelsInfo: {[id: string]: ViewerInfoModel}) {
         var html = "";
-        for (let i = 0, len = modelsInfo.length; i < len; i++) {
+        for (const i of Object.keys(modelsInfo)) {
             const modelInfo = modelsInfo[i];
             html += "<div class='xeokit-form-check'>";
-            html += "<input id='" + modelInfo.id + "' type='checkbox' value=''><span id='span-" + modelInfo.id + "' class='disabled'>" + modelInfo.name + "</span>";
+            html += "<input id='" + modelInfo.id + "' type='checkbox' value=''><label id='span-" + modelInfo.id + "' for='" + modelInfo.id + "' class='disabled'>" + modelInfo.name + "</span>";
             html += "</div>";
         }
         this.modelsRef.current.innerHTML = html;
-        for (let i = 0, len = modelsInfo.length; i < len; i++) {
+        for (const i of Object.keys(modelsInfo)) {
             const modelInfo = modelsInfo[i];
             const modelId = modelInfo.id;
-            const checkBox = document.getElementById("" + modelId);
+            const checkBox = document.getElementById(modelId);
             const span = document.getElementById("span-" + modelId);
             checkBox.addEventListener("click", () => {
                 if ((checkBox as any).checked) {
-                    this.props.loadModel(modelId);
-                } else {
-                    this.props.unloadModel(modelInfo.id);
-                }
-            });
-            span.addEventListener("click", () => {
-                const model = this.props.viewer.scene.models[modelId];
-                const modelLoaded = (!!model);
-                if (!modelLoaded) {
                     this.props.loadModel(modelId);
                 } else {
                     this.props.unloadModel(modelInfo.id);
@@ -164,17 +164,14 @@ export class ModelsExplorer extends React.Component<Props> {
         this.props.destroy();
     }
 
-    handleSetActiveTab = (event: React.MouseEvent) => {
-      event.preventDefault();
-      this.props.setActiveTab();
-    }
-
     public render() {
       const { classes } = this.props;
       return (
-        <div className={classes.modelsTab + " xeokit-tab" + (this.props.activeTab ? " active" : "") + (this.state.tabEnabled ? "" : " disabled")} >
-          <a className="xeokit-tab-btn" onClick={this.handleSetActiveTab} href="#">Models</a>
-          <div className="xeokit-tab-content">
+        <div
+          className={classes.root + (!this.props.activeTab ? ' ' + classes.rootHidden : '')}
+          hidden={!this.props.activeTab}
+        >
+          <div className={classes.buttonRow}>
             <ButtonGroup
               color="default"
               className={classes.buttonGroup}
@@ -206,8 +203,8 @@ export class ModelsExplorer extends React.Component<Props> {
                 Add
               </Button>
             }
-            <div className="xeokit-models" ref={this.modelsRef}></div>
           </div>
+          <div className={classes.content} ref={this.modelsRef}></div>
         </div>
       );
     }
@@ -215,8 +212,10 @@ export class ModelsExplorer extends React.Component<Props> {
 
 const styles = (theme: Theme) => ({
   root: {
-  },
-  modelsTab: {
+    flex: '1 1 100%',
+    display: 'flex',
+    flexDirection: 'column' as 'column',
+    overflow: 'auto',
     '& .xeokit-form-check': {
       padding: '2px 0 2px 15px',
       lineHeight: '3ex',
@@ -247,6 +246,18 @@ const styles = (theme: Theme) => ({
       backgroundColor: '#03103F',
       cursor: 'default',
     }
+  },
+  rootHidden: {
+    display: 'none',
+  },
+  buttonRow: {
+    textAlign: 'center' as 'center',
+    marginTop: '20px',
+    marginBottom: '10px',
+  },
+  content: {
+    padding: '0px 20px 20px 20px',
+    overflow: 'auto',
   },
   buttonGroup: {
     margin: '0px 10px 10px 10px',

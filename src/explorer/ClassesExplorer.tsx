@@ -16,7 +16,6 @@ interface Props extends WithStyles<typeof styles> {
   destroy(): void;
   showAll(event: React.MouseEvent): void;
   hideAll(event: React.MouseEvent): void;
-  setActiveTab(): void;
 }
 
 export class ClassesExplorer extends React.Component<Props> {
@@ -97,25 +96,25 @@ export class ClassesExplorer extends React.Component<Props> {
             this._treeViewContextMenu.show(e.event.pageX, e.event.pageY);
         });
 
-        this._treeView.on("nodeTitleClicked", (e: any) => {
-            const scene = this.props.viewer.scene;
-            const objectIds: string[] = [];
-            e.treeViewPlugin.withNodeTree(e.treeViewNode, (treeViewNode: any) => {
-                if (treeViewNode.objectId) {
-                    objectIds.push(treeViewNode.objectId);
-                }
-            });
-            const checked = e.treeViewNode.checked;
-            if (checked) {
-                scene.setObjectsXRayed(objectIds, false);
-                scene.setObjectsVisible(objectIds, false);
-                scene.setObjectsPickable(objectIds, true);
-            } else {
-                scene.setObjectsXRayed(objectIds, false);
-                scene.setObjectsVisible(objectIds, true);
-                scene.setObjectsPickable(objectIds, true);
-            }
-        });
+        // this._treeView.on("nodeTitleClicked", (e: any) => {
+        //     const scene = this.props.viewer.scene;
+        //     const objectIds: string[] = [];
+        //     e.treeViewPlugin.withNodeTree(e.treeViewNode, (treeViewNode: any) => {
+        //         if (treeViewNode.objectId) {
+        //             objectIds.push(treeViewNode.objectId);
+        //         }
+        //     });
+        //     const checked = e.treeViewNode.checked;
+        //     if (checked) {
+        //         scene.setObjectsXRayed(objectIds, false);
+        //         scene.setObjectsVisible(objectIds, false);
+        //         scene.setObjectsPickable(objectIds, true);
+        //     } else {
+        //         scene.setObjectsXRayed(objectIds, false);
+        //         scene.setObjectsVisible(objectIds, true);
+        //         scene.setObjectsPickable(objectIds, true);
+        //     }
+        // });
 
         this._onModelLoaded = this.props.viewer.scene.on("modelLoaded", (modelId: string) =>{
             if (this.props.viewer.metaScene.metaModels[modelId]) {
@@ -178,17 +177,14 @@ export class ClassesExplorer extends React.Component<Props> {
         this.props.viewer.scene.off(this._onModelUnloaded);
     }
 
-    handleSetActiveTab = (event: React.MouseEvent) => {
-      event.preventDefault();
-      this.props.setActiveTab();
-    }
-
     public render() {
       const { classes } = this.props;
       return (
-        <div className={classes.classesTab + " xeokit-tab" + (this.props.activeTab ? " active" : "") + (this.state.tabEnabled ? "" : " disabled")}>
-          <a className="xeokit-tab-btn" href="#" onClick={this.handleSetActiveTab}>Classes</a>
-          <div className="xeokit-tab-content">
+        <div
+          className={classes.root + (!this.props.activeTab ? ' ' + classes.rootHidden : '')}
+          hidden={!this.props.activeTab}
+        >
+          <div className={classes.buttonRow}>
             <ButtonGroup
               color="default"
               className={classes.buttonGroup}
@@ -210,8 +206,8 @@ export class ClassesExplorer extends React.Component<Props> {
                 Hide All
               </Button>
             </ButtonGroup>
-            <div className="xeokit-classes xeokit-tree-panel" ref={this.modelsRef}></div>
           </div>
+          <div className={classes.content} ref={this.modelsRef}></div>
         </div>
       );
     }
@@ -219,8 +215,10 @@ export class ClassesExplorer extends React.Component<Props> {
 
 const styles = (theme: Theme) => ({
   root: {
-  },
-  classesTab: {
+    flex: '1 1 100%',
+    display: 'flex',
+    flexDirection: 'column' as 'column',
+    overflow: 'auto',
     '& ul': {
       listStyle: 'none',
       paddingLeft: '1.75em',
@@ -279,6 +277,18 @@ const styles = (theme: Theme) => ({
       paddingLeft: '1px',
       paddingRight: '5px',
     },
+  },
+  rootHidden: {
+    display: 'none',
+  },
+  content: {
+    padding: '0px 20px 20px 20px',
+    overflow: 'auto',
+  },
+  buttonRow: {
+    textAlign: 'center' as 'center',
+    marginTop: '20px',
+    marginBottom: '10px',
   },
   buttonGroup: {
     margin: '0px 10px 10px 10px',
