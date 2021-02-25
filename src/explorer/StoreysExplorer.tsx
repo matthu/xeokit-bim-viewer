@@ -270,13 +270,17 @@ export class StoreysExplorer extends React.Component<Props> {
         this.props.viewer.scene.off(this._onModelUnloaded);
     }
 
-    handleShowAll = (event: React.MouseEvent) => {
+    clearStoreySelection = () => {
       this.setState({selectedStorey: null});
+    }
+
+    handleShowAll = (event: React.MouseEvent) => {
+      this.clearStoreySelection();
       this.props.showAll(event);
     }
 
     handleHideAll = (event: React.MouseEvent) => {
-      this.setState({selectedStorey: null});
+      this.clearStoreySelection();
       this.props.hideAll(event);
     }
 
@@ -316,7 +320,12 @@ export class StoreysExplorer extends React.Component<Props> {
             >
               <Button
                 variant="contained"
-                onClick={() => this.setState({advancedMode: false})}
+                onClick={() => {
+                  if (this.state.advancedMode) {
+                    this.clearStoreySelection();
+                    this.setState({advancedMode: false});
+                  }
+                }}
                 className={this.state.advancedMode ? classes.button : classes.selectedButton}
               >
                 Simple

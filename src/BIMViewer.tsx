@@ -560,6 +560,9 @@ export class BIMViewer extends React.Component<Props> {
     }
 
     handleSetTab = (tab: "models" | "objects" | "classes" | "storeys") => {
+        if (tab == "storeys" && this.storeysExplorerRef.current) {
+          this.storeysExplorerRef.current.clearStoreySelection();
+        }
         this.setState({activeTab: tab});
     }
 
