@@ -1,3 +1,4 @@
+import { BIMViewer } from "../BIMViewer";
 import { ContextMenu } from "../xeokit-sdk/extras/ContextMenu/ContextMenu";
 import { SectionPlanesPlugin } from "../xeokit-sdk/plugins/SectionPlanesPlugin/SectionPlanesPlugin";
 import { math } from "../xeokit-sdk/viewer/scene/math/math";
@@ -7,6 +8,11 @@ import { Viewer } from "../xeokit-sdk/viewer/Viewer";
 
 const tempAABB = math.AABB3();
 const tempVec3 = math.vec3();
+
+interface Context {
+  viewer: Viewer;
+  bimViewer: BIMViewer;
+}
 
 class SectionToolContextMenu extends ContextMenu {
 
@@ -54,23 +60,23 @@ class SectionToolContextMenu extends ContextMenu {
                     return "Slice #" + (i + 1);
                 },
 
-                doHoverEnter(context: any) {
+                doHoverEnter(context: Context) {
                     sectionPlanesPlugin.hideControl();
                     sectionPlanesPlugin.showControl(sectionPlane.id as string);
                 },
 
-                doHoverLeave(context: any) {
+                doHoverLeave(context: Context) {
                     sectionPlanesPlugin.hideControl();
                 },
 
                 items: [ // Submenu
                     [ // Group
                         {
-                            getTitle(context: any) {
+                            getTitle(context: Context) {
                                 return "Edit"
                             },
 
-                            doAction: (context: any) => {
+                            doAction: (context: Context) => {
 
                                 sectionPlanesPlugin.hideControl();
                                 sectionPlanesPlugin.showControl(sectionPlane.id as string);
@@ -92,20 +98,20 @@ class SectionToolContextMenu extends ContextMenu {
                             }
                         },
                         {
-                            getTitle(context: any) {
+                            getTitle(context: Context) {
                                 return "Flip"
                             },
 
-                            doAction: (context: any) => {
+                            doAction: (context: Context) => {
                                 sectionPlane.flipDir();
                             }
                         },
                         {
-                            getTitle(context: any) {
+                            getTitle(context: Context) {
                                 return "Delete"
                             },
 
-                            doAction: (context: any) => {
+                            doAction: (context: Context) => {
                                 sectionPlane.destroy();
                             }
                         }
@@ -115,26 +121,26 @@ class SectionToolContextMenu extends ContextMenu {
         }
 
         this.items = [
-            [
-                {
-                    title: "Clear Slices",
-                    getEnabled: function (context: any) {
-                        return (context.bimViewer.getNumSections() > 0);
-                    },
-                    doAction: function (context: any) {
-                        context.bimViewer.clearSections();
-                    }
-                },
-                {
-                    title: "Flip Slices",
-                    getEnabled: function (context: any) {
-                        return (context.bimViewer.getNumSections() > 0);
-                    },
-                    doAction: function (context: any) {
-                        context.bimViewer.flipSections();
-                    }
-                }
-            ],
+            // [
+            //     {
+            //         title: "Clear Slices",
+            //         getEnabled: function (context: Context) {
+            //             return (context.bimViewer.getNumSections() > 0);
+            //         },
+            //         doAction: function (context: Context) {
+            //             context.bimViewer.clearSections();
+            //         }
+            //     },
+            //     {
+            //         title: "Flip Slices",
+            //         getEnabled: function (context: Context) {
+            //             return (context.bimViewer.getNumSections() > 0);
+            //         },
+            //         doAction: function (context: Context) {
+            //             context.bimViewer.flipSections();
+            //         }
+            //     }
+            // ],
 
             sectionPlanesMenuItems
         ];

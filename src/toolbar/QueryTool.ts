@@ -41,7 +41,7 @@ class QueryTool extends Controller {
         });
 
         buttonElement.addEventListener("click", (event: Event) => {
-            this.bimViewer._sectionTool.hideControl();
+            // this.bimViewer._sectionTool.hideControl();
             if (!this.getEnabled()) {
                 return;
             }

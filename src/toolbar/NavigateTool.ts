@@ -9,7 +9,7 @@ function closeEnough(p: number[], q: number[]) {
 }
 
 /** @private */
-class HideTool extends Controller {
+class NavigateTool extends Controller {
 
     _onHover: any;
     _onHoverOff: any;
@@ -37,10 +37,8 @@ class HideTool extends Controller {
         this.on("active", (active: boolean) => {
             if (active) {
                 buttonElement.classList.add("active");
-                this.viewer.cameraControl.doublePickFlyTo = false;
             } else {
                 buttonElement.classList.remove("active");
-                this.viewer.cameraControl.doublePickFlyTo = true;
             }
         });
 
@@ -55,7 +53,7 @@ class HideTool extends Controller {
         });
 
         this.bimViewer.on("reset", () => {
-            this.setActive(false);
+            this.setActive(true);
         });
 
         this._init();
@@ -104,12 +102,12 @@ class HideTool extends Controller {
                     entity = null;
                     return;
                 }
-                entity.visible = false;
-                entity.highlighted = false;
+                // entity.visible = false;
+                // entity.highlighted = false;
                 entity = null;
             }
         });
     }
 }
 
-export { HideTool };
+export { NavigateTool };

@@ -32,14 +32,14 @@ class ThreeDMode extends Controller {
         });
 
         this._buttonElement.addEventListener("click", (event: Event) => {
-            this.bimViewer._sectionTool.hideControl();
+            // this.bimViewer._sectionTool.hideControl();
             this.setActive(!this.getActive(), () => { // Animated
             });
             event.preventDefault();
         });
 
         this.bimViewer.on("reset", () => {
-            this.setActive(true, () => { // Animated
+            this.setActive(false, () => { // Animated
             });
         });
     }
@@ -92,9 +92,9 @@ class ThreeDMode extends Controller {
         viewer.cameraControl.pivotPos = center;
 
         this.bimViewer._navCubeMode.setActive(true);
-        this.bimViewer._firstPersonMode.setEnabled(true);
+        // this.bimViewer._firstPersonMode.setEnabled(true);
         this._cameraControlNavModeMediator.setThreeDModeActive(true);
-        this.bimViewer._sectionTool.setEnabled(true);
+        // this.bimViewer._sectionTool.setEnabled(true);
 
         if (done) {
             viewer.cameraFlight.flyTo({
@@ -137,8 +137,8 @@ class ThreeDMode extends Controller {
 
         const up2 = math.mulVec3Scalar(camera.worldForward, -1, []);
 
-        this.bimViewer._sectionTool.setActive(false);
-        this.bimViewer._firstPersonMode.setEnabled(false);
+        // this.bimViewer._sectionTool.setActive(false);
+        // this.bimViewer._firstPersonMode.setEnabled(false);
 
         this._cameraControlNavModeMediator.setThreeDModeActive(false);
 

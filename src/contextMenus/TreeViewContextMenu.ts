@@ -1,10 +1,20 @@
+import { BIMViewer } from "../BIMViewer";
 import { ContextMenu } from "../xeokit-sdk/extras/ContextMenu/ContextMenu";
+import { TreeViewPlugin } from "../xeokit-sdk/plugins/TreeViewPlugin/TreeViewPlugin";
 import { math } from "../xeokit-sdk/viewer/scene/math/math";
+import { Viewer } from "../xeokit-sdk/viewer/Viewer";
 
 const tempVec3 = math.vec3();
 
 interface TreeViewNode {
   objectId: string;
+}
+
+interface Context {
+  viewer: Viewer;
+  bimViewer: BIMViewer;
+  treeViewPlugin: TreeViewPlugin;
+  treeViewNode: TreeViewNode;
 }
 
 /**
@@ -18,7 +28,7 @@ class TreeViewContextMenu extends ContextMenu {
                 [
                     {
                         title: "Isolate",
-                        doAction: function (context: any) {
+                        doAction: function (context: Context) {
                             const viewer = context.viewer;
                             const scene = viewer.scene;
                             const objectIds: string[] = [];
@@ -49,7 +59,7 @@ class TreeViewContextMenu extends ContextMenu {
                 [
                     {
                         title: "View Fit",
-                        doAction: function (context: any) {
+                        doAction: function (context: Context) {
                             const viewer = context.viewer;
                             const scene = viewer.scene;
                             const objectIds: string[] = [];
@@ -74,7 +84,7 @@ class TreeViewContextMenu extends ContextMenu {
                     },
                     {
                         title: "View Fit All",
-                        doAction: function (context: any) {
+                        doAction: function (context: Context) {
                             const viewer = context.viewer;
                             const scene = viewer.scene;
                             const sceneAABB = scene.getAABB(scene.visibleObjectIds);
@@ -89,7 +99,7 @@ class TreeViewContextMenu extends ContextMenu {
                 [
                     {
                         title: "Hide",
-                        doAction: function (context: any) {
+                        doAction: function (context: Context) {
                             context.treeViewPlugin.withNodeTree(context.treeViewNode, (treeViewNode: TreeViewNode) => {
                                 if (treeViewNode.objectId) {
                                     const entity = context.viewer.scene.objects[treeViewNode.objectId];
@@ -102,7 +112,7 @@ class TreeViewContextMenu extends ContextMenu {
                     },
                     {
                         title: "Hide Others",
-                        doAction: function (context: any) {
+                        doAction: function (context: Context) {
                             const scene = context.viewer.scene;
                             scene.setObjectsVisible(scene.visibleObjectIds, false);
                             scene.setObjectsPickable(scene.xrayedObjectIds, true);
@@ -120,10 +130,10 @@ class TreeViewContextMenu extends ContextMenu {
                     },
                     {
                         title: "Hide All",
-                        getEnabled: function (context: any) {
+                        getEnabled: function (context: Context) {
                             return (context.viewer.scene.visibleObjectIds.length > 0);
                         },
-                        doAction: function (context: any) {
+                        doAction: function (context: Context) {
                             context.viewer.scene.setObjectsVisible(context.viewer.scene.visibleObjectIds, false);
                         }
                     }
@@ -131,7 +141,7 @@ class TreeViewContextMenu extends ContextMenu {
                 [
                     {
                         title: "Show",
-                        doAction: function (context: any) {
+                        doAction: function (context: Context) {
                             context.treeViewPlugin.withNodeTree(context.treeViewNode, (treeViewNode: TreeViewNode) => {
                                 if (treeViewNode.objectId) {
                                     const entity = context.viewer.scene.objects[treeViewNode.objectId];
@@ -149,7 +159,7 @@ class TreeViewContextMenu extends ContextMenu {
                     },
                     {
                         title: "Show Others",
-                        doAction: function (context: any) {
+                        doAction: function (context: Context) {
                             const scene = context.viewer.scene;
                             scene.setObjectsVisible(scene.objectIds, true);
                             scene.setObjectsPickable(scene.xrayedObjectIds, true);
@@ -166,11 +176,11 @@ class TreeViewContextMenu extends ContextMenu {
                     },
                     {
                         title: "Show All",
-                        getEnabled: function (context: any) {
+                        getEnabled: function (context: Context) {
                             const scene = context.viewer.scene;
                             return ((scene.numVisibleObjects < scene.numObjects) || (context.viewer.scene.numXRayedObjects > 0));
                         },
-                        doAction: function (context: any) {
+                        doAction: function (context: Context) {
                             const scene = context.viewer.scene;
                             scene.setObjectsVisible(scene.objectIds, true);
                             scene.setObjectsPickable(scene.xrayedObjectIds, true);
@@ -181,7 +191,7 @@ class TreeViewContextMenu extends ContextMenu {
                 [
                     {
                         title: "X-Ray",
-                        doAction: function (context: any) {
+                        doAction: function (context: Context) {
                             context.treeViewPlugin.withNodeTree(context.treeViewNode, (treeViewNode: TreeViewNode) => {
                                 if (treeViewNode.objectId) {
                                     const entity = context.viewer.scene.objects[treeViewNode.objectId];
@@ -196,7 +206,7 @@ class TreeViewContextMenu extends ContextMenu {
                     },
                     {
                         title: "Undo X-Ray",
-                        doAction: function (context: any) {
+                        doAction: function (context: Context) {
                             context.treeViewPlugin.withNodeTree(context.treeViewNode, (treeViewNode: TreeViewNode) => {
                                 if (treeViewNode.objectId) {
                                     const entity = context.viewer.scene.objects[treeViewNode.objectId];
@@ -210,7 +220,7 @@ class TreeViewContextMenu extends ContextMenu {
                     },
                     {
                         title: "X-Ray Others",
-                        doAction: function (context: any) {
+                        doAction: function (context: Context) {
                             const scene = context.viewer.scene;
                             scene.setObjectsVisible(scene.objectIds, true);
                             scene.setObjectsPickable(scene.objectIds, false);
@@ -229,7 +239,7 @@ class TreeViewContextMenu extends ContextMenu {
                     },
                     {
                         title: "X-Ray All",
-                        doAction: function (context: any) {
+                        doAction: function (context: Context) {
                             const scene = context.viewer.scene;
                             scene.setObjectsVisible(scene.objectIds, true);
                             scene.setObjectsXRayed(scene.objectIds, true);
@@ -238,10 +248,10 @@ class TreeViewContextMenu extends ContextMenu {
                     },
                     {
                         title: "X-Ray None",
-                        getEnabled: function (context: any) {
+                        getEnabled: function (context: Context) {
                             return (context.viewer.scene.numXRayedObjects > 0);
                         },
-                        doAction: function (context: any) {
+                        doAction: function (context: Context) {
                             const scene = context.viewer.scene;
                             const xrayedObjectIds = scene.xrayedObjectIds;
                             scene.setObjectsPickable(xrayedObjectIds, true);
@@ -252,7 +262,7 @@ class TreeViewContextMenu extends ContextMenu {
                 [
                     {
                         title: "Select",
-                        doAction: function (context: any) {
+                        doAction: function (context: Context) {
                             context.treeViewPlugin.withNodeTree(context.treeViewNode, (treeViewNode: TreeViewNode) => {
                                 if (treeViewNode.objectId) {
                                     const entity = context.viewer.scene.objects[treeViewNode.objectId];
@@ -260,13 +270,14 @@ class TreeViewContextMenu extends ContextMenu {
                                         entity.selected = true;
                                         entity.visible = true;
                                     }
+                                    context.bimViewer.showObjectProperties(entity.id);
                                 }
                             });
                         }
                     },
                     {
                         title: "Undo Select",
-                        doAction: function (context: any) {
+                        doAction: function (context: Context) {
                             context.treeViewPlugin.withNodeTree(context.treeViewNode, (treeViewNode: TreeViewNode) => {
                                 if (treeViewNode.objectId) {
                                     const entity = context.viewer.scene.objects[treeViewNode.objectId];
@@ -275,29 +286,31 @@ class TreeViewContextMenu extends ContextMenu {
                                     }
                                 }
                             });
+                            context.bimViewer.clearObjectProperties();
                         }
                     },
                     {
                         title: "Select None",
-                        getEnabled: function (context: any) {
+                        getEnabled: function (context: Context) {
                             return (context.viewer.scene.numSelectedObjects > 0);
                         },
-                        doAction: function (context: any) {
+                        doAction: function (context: Context) {
                             context.viewer.scene.setObjectsSelected(context.viewer.scene.selectedObjectIds, false);
+                            context.bimViewer.clearObjectProperties();
                         }
                     }
                 ],
-                [
-                    {
-                        title: "Clear Slices",
-                        getEnabled: function (context: any) {
-                            return (context.bimViewer.getNumSections() > 0);
-                        },
-                        doAction: function (context: any) {
-                            context.bimViewer.clearSections();
-                        }
-                    }
-                ]
+                // [
+                //     {
+                //         title: "Clear Slices",
+                //         getEnabled: function (context: Context) {
+                //             return (context.bimViewer.getNumSections() > 0);
+                //         },
+                //         doAction: function (context: Context) {
+                //             context.bimViewer.clearSections();
+                //         }
+                //     }
+                // ]
             ]
         })
     }

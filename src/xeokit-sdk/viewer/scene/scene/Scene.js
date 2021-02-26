@@ -817,7 +817,9 @@ class Scene extends Component {
 
         this._camera = new Camera(this, {
             id: "default.camera",
-            dontClear: true // Never destroy this component with Scene#clear();
+            dontClear: true, // Never destroy this component with Scene#clear();
+            // Added default ortho view
+            projection: "ortho"
         });
 
         // Default lights

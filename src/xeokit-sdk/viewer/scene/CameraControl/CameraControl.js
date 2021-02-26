@@ -629,8 +629,8 @@ class CameraControl extends Component {
 
             active: true,
             keyboardLayout: "qwerty",
-            navMode: "orbit",
-            planView: false,
+            navMode: "planView",
+            planView: true,
             firstPerson: false,
             followPointer: false,
             doublePickFlyTo: true,
@@ -903,10 +903,10 @@ class CameraControl extends Component {
      * @param {String} navMode The navigation mode: "orbit", "firstPerson" or "planView".
      */
     set navMode(navMode) {
-        navMode = navMode || "orbit";
+        navMode = navMode || "planView";
         if (navMode !== "firstPerson" && navMode !== "orbit" && navMode !== "planView") {
             this.error("Unsupported value for navMode: " + navMode + " - supported values are 'orbit', 'firstPerson' and 'planView' - defaulting to 'orbit'");
-            navMode = "orbit";
+            navMode = "planView";
         }
         this._configs.firstPerson = (navMode === "firstPerson");
         this._configs.planView = (navMode === "planView");

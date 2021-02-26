@@ -1,6 +1,15 @@
+import { BIMViewer } from "../BIMViewer.js";
 import { ContextMenu } from "../xeokit-sdk/extras/ContextMenu/ContextMenu.js";
+import { Entity } from "../xeokit-sdk/viewer/scene/Entity.js";
 import { math } from "../xeokit-sdk/viewer/scene/math/math.js";
 import { Viewer } from "../xeokit-sdk/viewer/Viewer.js";
+
+interface Context {
+  viewer: Viewer;
+  bimViewer: BIMViewer;
+  entity: Entity;
+  showObjectInExplorers(objectId: any): any;
+}
 
 /**
  * @private
@@ -13,7 +22,7 @@ class ObjectContextMenu extends ContextMenu {
                 [
                     {
                         title: "View Fit",
-                        doAction: function (context: any) {
+                        doAction: function (context: Context) {
                             const viewer: Viewer = context.viewer;
                             const scene = viewer.scene;
                             const entity = context.entity;
@@ -30,7 +39,7 @@ class ObjectContextMenu extends ContextMenu {
                     },
                     {
                         title: "View Fit All",
-                        doAction: function (context: any) {
+                        doAction: function (context: Context) {
                             const viewer: Viewer = context.viewer;
                             const scene = viewer.scene;
                             const sceneAABB = scene.getAABB(scene.visibleObjectIds);
@@ -43,32 +52,32 @@ class ObjectContextMenu extends ContextMenu {
                     },
                     {
                         title: "Show in Tree",
-                        doAction: function (context: any) {
-                            const objectId: string = context.entity.id;
+                        doAction: function (context: Context) {
+                            const objectId: string = context.entity.id as string;
                             context.showObjectInExplorers(objectId);
                         }
                     },
                     {
                       title: "Show properties",
-                      doAction: function (context: any) {
-                          const objectId: string = context.entity.id;
-                          context.showObjectProperties(objectId);
+                      doAction: function (context: Context) {
+                          const objectId: string = context.entity.id as string;
+                          context.bimViewer.showObjectProperties(objectId);
                       }
                   }
                 ],
                 [
                     {
                         title: "Hide",
-                        getEnabled: function (context: any): boolean {
+                        getEnabled: function (context: Context): boolean {
                             return context.entity.visible;
                         },
-                        doAction: function (context: any): void {
+                        doAction: function (context: Context): void {
                             context.entity.visible = false;
                         }
                     },
                     {
                         title: "Hide Others",
-                        doAction: function (context: any): void {
+                        doAction: function (context: Context): void {
                             const viewer = context.viewer;
                             const scene = viewer.scene;
                             const entity = context.entity;
@@ -88,20 +97,20 @@ class ObjectContextMenu extends ContextMenu {
                     },
                     {
                         title: "Hide All",
-                        getEnabled: function (context: any): boolean {
+                        getEnabled: function (context: Context): boolean {
                             return (context.viewer.scene.numVisibleObjects > 0);
                         },
-                        doAction: function (context: any): void {
+                        doAction: function (context: Context): void {
                             context.viewer.scene.setObjectsVisible(context.viewer.scene.visibleObjectIds, false);
                         }
                     },
                     {
                         title: "Show All",
-                        getEnabled: function (context: any): boolean {
+                        getEnabled: function (context: Context): boolean {
                             const scene = context.viewer.scene;
                             return ((scene.numVisibleObjects < scene.numObjects) || (context.viewer.scene.numXRayedObjects > 0));
                         },
-                        doAction: function (context: any): void {
+                        doAction: function (context: Context): void {
                             const scene = context.viewer.scene;
                             scene.setObjectsVisible(scene.objectIds, true);
                             scene.setObjectsPickable(scene.xrayedObjectIds, true);
@@ -112,10 +121,10 @@ class ObjectContextMenu extends ContextMenu {
                 [
                     {
                         title: "X-Ray",
-                        getEnabled: function (context: any): boolean {
+                        getEnabled: function (context: Context): boolean {
                             return (!context.entity.xrayed);
                         },
-                        doAction: function (context: any): void {
+                        doAction: function (context: Context): void {
                             const entity = context.entity;
                             entity.xrayed = true;
                             entity.pickable = false;
@@ -123,7 +132,7 @@ class ObjectContextMenu extends ContextMenu {
                     },
                     {
                         title: "X-Ray Others",
-                        doAction: function (context: any): void {
+                        doAction: function (context: Context): void {
                             const viewer = context.viewer;
                             const scene = viewer.scene;
                             const entity = context.entity;
@@ -146,11 +155,11 @@ class ObjectContextMenu extends ContextMenu {
                     },
                     {
                         title: "X-Ray All",
-                        getEnabled: function (context: any): boolean {
+                        getEnabled: function (context: Context): boolean {
                             const scene = context.viewer.scene;
                             return (scene.numXRayedObjects < scene.numObjects);
                         },
-                        doAction: function (context: any): void {
+                        doAction: function (context: Context): void {
                             const scene = context.viewer.scene;
                             scene.setObjectsVisible(scene.objectIds, true);
                             scene.setObjectsPickable(scene.objectIds, false);
@@ -159,10 +168,10 @@ class ObjectContextMenu extends ContextMenu {
                     },
                     {
                         title: "X-Ray None",
-                        getEnabled: function (context: any): boolean {
+                        getEnabled: function (context: Context): boolean {
                             return (context.viewer.scene.numXRayedObjects > 0);
                         },
-                        doAction: function (context: any): void {
+                        doAction: function (context: Context): void {
                             const scene = context.viewer.scene;
                             const xrayedObjectIds = scene.xrayedObjectIds;
                             scene.setObjectsPickable(xrayedObjectIds, true);
@@ -173,44 +182,46 @@ class ObjectContextMenu extends ContextMenu {
                 [
                     {
                         title: "Select",
-                        getEnabled: function (context: any): boolean {
+                        getEnabled: function (context: Context): boolean {
                             return (!context.entity.selected);
                         },
-                        doAction: function (context: any): void {
+                        doAction: function (context: Context): void {
                             context.entity.selected = true;
-
+                            context.bimViewer.showObjectProperties(context.entity.id as string);
                         }
                     },
                     {
                         title: "Undo Select",
-                        getEnabled: function (context: any): boolean {
+                        getEnabled: function (context: Context): boolean {
                             return context.entity.selected;
                         },
-                        doAction: function (context: any): void {
+                        doAction: function (context: Context): void {
                             context.entity.selected = false;
+                            context.bimViewer.clearObjectProperties();
                         }
                     },
                     {
                         title: "Select None",
-                        getEnabled: function (context: any): boolean {
+                        getEnabled: function (context: Context): boolean {
                             return (context.viewer.scene.numSelectedObjects > 0);
                         },
-                        doAction: function (context: any): void {
+                        doAction: function (context: Context): void {
                             context.viewer.scene.setObjectsSelected(context.viewer.scene.selectedObjectIds, false);
+                            context.bimViewer.clearObjectProperties();
                         }
                     }
                 ],
-                [
-                    {
-                        title: "Clear Slices",
-                        getEnabled: function (context: any): boolean {
-                            return (context.bimViewer.getNumSections() > 0);
-                        },
-                        doAction: function (context: any): void {
-                            context.bimViewer.clearSections();
-                        }
-                    }
-                ]
+                // [
+                //     {
+                //         title: "Clear Slices",
+                //         getEnabled: function (context: Context): boolean {
+                //             return (context.bimViewer.getNumSections() > 0);
+                //         },
+                //         doAction: function (context: Context): void {
+                //             context.bimViewer.clearSections();
+                //         }
+                //     }
+                // ]
             ]
         });
     }

@@ -19,6 +19,7 @@ import { FirstPersonMode } from "./toolbar/FirstPersonMode";
 import { FitAction } from "./toolbar/FitAction";
 import { HideTool } from "./toolbar/HideTool";
 import { NavCubeMode } from "./toolbar/NavCubeMode";
+import { NavigateTool } from './toolbar/NavigateTool';
 import { OrthoMode } from "./toolbar/OrthoMode";
 import { QueryTool } from "./toolbar/QueryTool";
 import { ResetAction } from "./toolbar/ResetAction";
@@ -197,12 +198,13 @@ export class BIMViewer extends React.Component<Props> {
     _threeDMode: ThreeDMode;
     // _orthoMode: OrthoMode;
     _navCubeMode: NavCubeMode;
-    _firstPersonMode: FirstPersonMode;
+    // _firstPersonMode: FirstPersonMode;
     //Tools
+    _navigateTool: NavigateTool;
     _hideTool: HideTool;
     _selectionTool: SelectionTool;
-    _queryTool: QueryTool;
-    _sectionTool: SectionTool;
+    // _queryTool: QueryTool;
+    // _sectionTool: SectionTool;
     // Explorers
     // _modelsExplorer: ModelsExplorer;
     // _objectsExplorer: ObjectsExplorer;
@@ -398,11 +400,11 @@ export class BIMViewer extends React.Component<Props> {
 
             this.setThreeDModeActive = (active: boolean) => {
                 if (active) {
-                    bimViewer._firstPersonMode.setActive(false);
+                    // bimViewer._firstPersonMode.setActive(false);
                     bimViewer.viewer.cameraControl.navMode = "orbit";
                     //  bimViewer.viewer.cameraControl.followPointer = true;
                 } else {
-                    bimViewer._firstPersonMode.setActive(false);
+                    // bimViewer._firstPersonMode.setActive(false);
                     bimViewer.viewer.cameraControl.navMode = "planView";
                     //  bimViewer.viewer.cameraControl.followPointer = false;
                 }
@@ -427,10 +429,15 @@ export class BIMViewer extends React.Component<Props> {
         //     active: false
         // });
 
-        this._firstPersonMode = new FirstPersonMode(this, {
-            buttonElement: toolbarElement.querySelector(".xeokit-firstPerson"),
-            cameraControlNavModeMediator: cameraControlNavModeMediator,
-            active: false
+        // this._firstPersonMode = new FirstPersonMode(this, {
+        //     buttonElement: toolbarElement.querySelector(".xeokit-firstPerson"),
+        //     cameraControlNavModeMediator: cameraControlNavModeMediator,
+        //     active: false
+        // });
+
+        this._navigateTool = new NavigateTool(this, {
+            buttonElement: toolbarElement.querySelector(".xeokit-navigate"),
+            active: true
         });
 
         this._hideTool = new HideTool(this, {
@@ -443,32 +450,33 @@ export class BIMViewer extends React.Component<Props> {
             active: false
         });
 
-        this._queryTool = new QueryTool(this, {
-            buttonElement: toolbarElement.querySelector(".xeokit-query"),
-            // queryInfoPanelElement: queryInfoPanelElement,
-            active: false
-        });
+        // this._queryTool = new QueryTool(this, {
+        //     buttonElement: toolbarElement.querySelector(".xeokit-query"),
+        //     // queryInfoPanelElement: queryInfoPanelElement,
+        //     active: false
+        // });
 
-        this._sectionTool = new SectionTool(this, {
-            buttonElement: toolbarElement.querySelector(".xeokit-section"),
-            counterElement: toolbarElement.querySelector(".xeokit-section-counter"),
-            menuButtonElement: toolbarElement.querySelector(".xeokit-section-menu-button"),
-            menuButtonArrowElement: toolbarElement.querySelector(".xeokit-section-menu-button-arrow"),
-            active: false
-        });
+        // this._sectionTool = new SectionTool(this, {
+        //     buttonElement: toolbarElement.querySelector(".xeokit-section"),
+        //     counterElement: toolbarElement.querySelector(".xeokit-section-counter"),
+        //     menuButtonElement: toolbarElement.querySelector(".xeokit-section-menu-button"),
+        //     menuButtonArrowElement: toolbarElement.querySelector(".xeokit-section-menu-button-arrow"),
+        //     active: false
+        // });
 
         this._navCubeMode = new NavCubeMode(this, {
             navCubeCanvasElement: navCubeCanvasElement,
-            active: true
+            active: false
         });
 
         this._busyModal = new BusyModal(this, {
             busyModalBackdropElement: busyModelBackdropElement
         });
 
-        this._threeDMode.setActive(true);
-        this._firstPersonMode.setActive(false);
-        this._navCubeMode.setActive(true);
+        this._navigateTool.setActive(true);
+        this._threeDMode.setActive(false);
+        // this._firstPersonMode.setActive(false);
+        this._navCubeMode.setActive(false);
 
         // this._modelsExplorer.on("modelLoaded", (modelId: string) => {
         //     if (this._modelsExplorer.getNumModelsLoaded() > 0) {
@@ -485,27 +493,28 @@ export class BIMViewer extends React.Component<Props> {
         //     this.fire("modelUnloaded", modelId);
         // });
 
-        this._queryTool.on("queryPicked", (event: any) => {
-            this.fire("queryPicked", event);
-        });
+        // this._queryTool.on("queryPicked", (event: any) => {
+        //     this.fire("queryPicked", event);
+        // });
 
-        this._queryTool.on("queryNotPicked", () => {
-            this.fire("queryNotPicked", true);
-        });
+        // this._queryTool.on("queryNotPicked", () => {
+        //     this.fire("queryNotPicked", true);
+        // });
 
-        this._queryTool.on("objectSelected", (objectId: string) => {
-          this.showObjectPropertes(objectId);
-        });
+        // this._queryTool.on("objectSelected", (objectId: string) => {
+        //   this.showObjectPropertes(objectId);
+        // });
 
         this._selectionTool.on("objectSelected", (objectId: string) => {
-          this.showObjectPropertes(objectId);
+          this.showObjectProperties(objectId);
         });
 
         this._resetAction.on("reset", () => {
             this.fire("reset", true);
         });
 
-        this._mutexActivation([this._queryTool, this._hideTool, this._selectionTool, this._sectionTool]);
+        // this._mutexActivation([this._queryTool, this._hideTool, this._selectionTool, this._sectionTool]);
+        this._mutexActivation([this._selectionTool, this._hideTool, this._navigateTool]);
 
         // explorerElement.querySelector(".xeokit-loadAllModels").addEventListener("click", (event: Event) => {
         //     this.setControlsEnabled(false); // For quick UI feedback
@@ -723,7 +732,7 @@ export class BIMViewer extends React.Component<Props> {
                         this.showObjectInExplorers(objectId);
                     },
                     showObjectProperties: (objectId: any) => {
-                      this.showObjectPropertes(objectId);
+                      this.showObjectProperties(objectId);
                     },
                     entity: hit.entity
                 };
@@ -1138,6 +1147,7 @@ export class BIMViewer extends React.Component<Props> {
                           // const checkbox = document.getElementById("" + modelId);
                           // (checkbox as any).checked = true;
                           const scene = this.viewer.scene;
+                          const camera = scene.camera;
                           const aabb = scene.getAABB(scene.visibleObjectIds);
                           this.setState({numModelsLoaded: this.state.numModelsLoaded + 1, unloadModelsEnabled: true, loadModelsEnabled: (this.state.numModelsLoaded < this.state.numModels)});
                           // // this._unloadModelsButtonElement.classList.remove("disabled");
@@ -1148,7 +1158,7 @@ export class BIMViewer extends React.Component<Props> {
                           // }
                           if (this.state.numModelsLoaded === 1) { // Jump camera to view-fit first model loaded
                               this.viewer.cameraFlight.jumpTo({
-                                  aabb: aabb
+                                  aabb: aabb,
                               });
                               this.viewer.cameraControl.pivotPos = math.getAABB3Center(aabb, tempVec3);
                               this.modelsExplorerLoaded(modelId);
@@ -1496,7 +1506,7 @@ export class BIMViewer extends React.Component<Props> {
     }
 
     _parseThreeDMode(viewerState: ViewerState, done: any) {
-        const activateThreeDMode = (viewerState.threeDActive !== false);
+        const activateThreeDMode = false; //(viewerState.threeDActive !== false);
         this.set3DEnabled(activateThreeDMode, done);
     }
 
@@ -2060,11 +2070,12 @@ export class BIMViewer extends React.Component<Props> {
         this._fitAction.setEnabled(enabled);
         this._threeDMode.setEnabled(enabled);
         // this._orthoMode.setEnabled(enabled);
-        this._firstPersonMode.setEnabled(enabled);
-        this._queryTool.setEnabled(enabled);
+        // this._firstPersonMode.setEnabled(enabled);
+        // this._queryTool.setEnabled(enabled);
+        this._navigateTool.setEnabled(enabled);
         this._hideTool.setEnabled(enabled);
         this._selectionTool.setEnabled(enabled);
-        this._sectionTool.setEnabled(enabled);
+        // this._sectionTool.setEnabled(enabled);
     }
 
     /**
@@ -2098,24 +2109,24 @@ export class BIMViewer extends React.Component<Props> {
      *
      * Sections are the sliceing planes, that we use to section models in order to see interior structures.
      */
-    clearSections() {
-        this._sectionTool.clear();
-    }
+    // clearSections() {
+    //     this._sectionTool.clear();
+    // }
 
 
     /**
      * Inverts the direction of sections.
      */
-    flipSections() {
-        this._sectionTool.flipSections();
-    }
+    // flipSections() {
+    //     this._sectionTool.flipSections();
+    // }
 
     /**
      * Hides the section edition control, if currently shown.
      */
-    hideSectionEditControl() {
-        this._sectionTool.hideControl();
-    }
+    // hideSectionEditControl() {
+    //     this._sectionTool.hideControl();
+    // }
 
     /**
      * returns the number of sections that currently exist.
@@ -2124,9 +2135,9 @@ export class BIMViewer extends React.Component<Props> {
      *
      * @returns {Number} The number of sections.
      */
-    getNumSections() {
-        return this._sectionTool.getNumSections();
-    }
+    // getNumSections() {
+    //     return this._sectionTool.getNumSections();
+    // }
 
     /**
      * Fires an event on this Controller.
@@ -2400,9 +2411,16 @@ export class BIMViewer extends React.Component<Props> {
   }
 
   /**
+   * Clears object properties
+   */
+  clearObjectProperties() {
+    this.setState({showObjectProperties: null});
+  }
+
+  /**
    * Show object properties in the pane
    */
-  showObjectPropertes(objectId: string) {
+  showObjectProperties(objectId: string) {
     const objectProperties: ObjectProperties = {
       id: objectId,
       hierarchy: null,
@@ -2626,29 +2644,31 @@ export class BIMViewer extends React.Component<Props> {
                   </div>
                   <div className="xeokit-btn-group" role="group">
                     {/* 3D Mode button */}
-                    <button type="button" className="xeokit-threeD xeokit-btn fa fa-cube fa-2x" data-tippy-content="Toggle 2D/3D"></button>
+                    <button type="button" className="xeokit-threeD xeokit-btn fa fa-cube fa-2x disabled" data-tippy-content="Toggle 2D/3D"></button>
                     {/* Perspective/Ortho Mode button */}
                     {/* <button type="button" className="xeokit-ortho xeokit-btn fa fa-th fa-2x" data-tippy-content="Toggle Perspective/Ortho"></button> */}
                     {/* Fit button */}
-                    <button type="button" className="xeokit-fit xeokit-btn fa fa-crop fa-2x disabled" data-tippy-content="View fit"></button>   
+                    <button type="button" className="xeokit-fit xeokit-btn fa fa-crop fa-2x disabled" data-tippy-content="Fit view"></button>
                     {/* First Person mode button */}
-                    <button type="button" className="xeokit-firstPerson xeokit-btn fa fa-male fa-2x disabled" data-tippy-content="First person"></button>
+                    {/* <button type="button" className="xeokit-firstPerson xeokit-btn fa fa-male fa-2x disabled" data-tippy-content="First person"></button> */}
                   </div>
                   {/* Tools button group */}
                   <div className="xeokit-btn-group" role="group">
-                    {/* Hide tool button */}
-                    <button type="button" className="xeokit-hide xeokit-btn fa fa-eraser fa-2x disabled" data-tippy-content="Hide objects"></button>
+                    {/* Navigate tool button */}
+                    <button type="button" className="xeokit-navigate xeokit-btn fa fa-hand-paper fa-2x disabled" data-tippy-content="Navigate"></button>
                     {/* Select tool button */}
                     <button type="button" className="xeokit-select xeokit-btn fa fa-mouse-pointer fa-2x disabled" data-tippy-content="Select objects"></button>
+                    {/* Hide tool button */}
+                    <button type="button" className="xeokit-hide xeokit-btn fa fa-eraser fa-2x disabled" data-tippy-content="Hide objects"></button>
                     {/* Query tool button */}
-                    <button type="button" className="xeokit-query xeokit-btn fa fa-info-circle fa-2x disabled" data-tippy-content="Query objects"></button>
+                    {/* <button type="button" className="xeokit-query xeokit-btn fa fa-info-circle fa-2x disabled" data-tippy-content="Query objects"></button> */}
                     {/* section tool button */}
-                    <button type="button" className="xeokit-section xeokit-btn fa fa-cut fa-2x disabled" data-tippy-content="Slice objects">
+                    {/* <button type="button" className="xeokit-section xeokit-btn fa fa-cut fa-2x disabled" data-tippy-content="Slice objects">
                       <div className="xeokit-section-menu-button">
                         <span className="xeokit-arrow-down xeokit-section-menu-button-arrow"></span>
                       </div>
                       <div className="xeokit-section-counter" data-tippy-content="Number of existing slices"></div>
-                    </button>
+                    </button> */}
                   </div>
                 </div>
               </div>

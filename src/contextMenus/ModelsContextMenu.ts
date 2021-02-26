@@ -1,4 +1,12 @@
+import { BIMViewer } from "../BIMViewer";
 import { ContextMenu } from "../xeokit-sdk/extras/ContextMenu/ContextMenu";
+import { Viewer } from "../xeokit-sdk/viewer/Viewer";
+
+interface Context {
+  viewer: Viewer;
+  bimViewer: BIMViewer;
+  modelId: string;
+}
 
 /**
  * @private
@@ -15,19 +23,19 @@ class ModelsContextMenu extends ContextMenu {
             [
                 {
                     title: "Load",
-                    getEnabled: function (context: any) {
+                    getEnabled: function (context: Context) {
                         return (!context.bimViewer.isModelLoaded(context.modelId));
                     },
-                    doAction: function (context: any) {
+                    doAction: function (context: Context) {
                         context.bimViewer.loadModel(context.modelId);
                     }
                 },
                 {
                     title: "Unload",
-                    getEnabled: function (context: any) {
+                    getEnabled: function (context: Context) {
                         return context.bimViewer.isModelLoaded(context.modelId);
                     },
-                    doAction: function (context: any) {
+                    doAction: function (context: Context) {
                         context.bimViewer.unloadModel(context.modelId);
                     }
                 }
@@ -39,19 +47,19 @@ class ModelsContextMenu extends ContextMenu {
             items.push([
                 {
                     title: "Edit",
-                    getEnabled: function (context: any) {
+                    getEnabled: function (context: Context) {
                         return true;
                     },
-                    doAction: function (context: any) {
+                    doAction: function (context: Context) {
                         context.bimViewer.editModel(context.modelId);
                     }
                 },
                 {
                     title: "Delete",
-                    getEnabled: function (context: any) {
+                    getEnabled: function (context: Context) {
                         return true;
                     },
-                    doAction: function (context: any) {
+                    doAction: function (context: Context) {
                         context.bimViewer.deleteModel(context.modelId);
                     }
                 }
@@ -61,39 +69,39 @@ class ModelsContextMenu extends ContextMenu {
         items.push([
             {
                 title: "Load All",
-                getEnabled: function (context: any) {
+                getEnabled: function (context: Context) {
                     const bimViewer = context.bimViewer;
                     const modelIds = bimViewer.getModelIds();
                     const loadedModelIds = bimViewer.getLoadedModelIds();
                     return (loadedModelIds.length < modelIds.length);
                 },
-                doAction: function (context: any) {
+                doAction: function (context: Context) {
                     context.bimViewer.loadAllModels();
                 }
             },
             {
                 title: "Unload All",
-                getEnabled: function (context: any) {
+                getEnabled: function (context: Context) {
                     const loadedModelIds = context.bimViewer.getLoadedModelIds();
                     return (loadedModelIds.length > 0);
                 },
-                doAction: function (context: any) {
+                doAction: function (context: Context) {
                     context.bimViewer.unloadAllModels();
                 }
             }
         ]);
 
-        items.push([
-            {
-                title: "Clear Slices",
-                getEnabled: function (context: any) {
-                    return (context.bimViewer.getNumSections() > 0);
-                },
-                doAction: function (context: any) {
-                    context.bimViewer.clearSections();
-                }
-            }
-        ]);
+        // items.push([
+        //     {
+        //         title: "Clear Slices",
+        //         getEnabled: function (context: Context) {
+        //             return (context.bimViewer.getNumSections() > 0);
+        //         },
+        //         doAction: function (context: Context) {
+        //             context.bimViewer.clearSections();
+        //         }
+        //     }
+        // ]);
 
         super({
             context: cfg.context,
