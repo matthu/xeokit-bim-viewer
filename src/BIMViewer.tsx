@@ -2866,21 +2866,24 @@ const styles = (theme: Theme) => ({
     flexDirection: 'column' as 'column',
   },
   contentTabs: {
-    backgroundColor: 'white',
+    backgroundColor: '#2c365e',
   },
   tabRoot: {
     minWidth: '72px !important',
-    color: theme.palette.primary.main,
+    color: 'white',
+    backgroundColor: theme.palette.primary.light,
     fontWeight: 'bold' as 'bold',
     '&:hover': {
-      color: theme.palette.secondary.main,
+      color: 'white',
+      backgroundColor: "#252d4e",
     },
   },
   tabSelected: {
-    backgroundColor: theme.palette.primary.main,
     color: 'white',
+    backgroundColor: theme.palette.primary.main,
     '&:hover': {
       color: 'white',
+      backgroundColor: theme.palette.primary.main,
     },
   },
   tabIndicator: {

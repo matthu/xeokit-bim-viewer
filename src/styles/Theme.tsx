@@ -5,6 +5,7 @@ import { createMuiTheme } from '@material-ui/core/styles';
 export const styleTheme = createMuiTheme({
   palette: {
     primary: {
+      light: '#2c365e',
       main: '#03103F',
     },
     secondary: {

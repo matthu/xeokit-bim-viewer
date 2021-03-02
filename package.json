@@ -18,7 +18,7 @@
     "build": "webpack --config webpack.prod.js -p",
     "watch": "webpack --config webpack.dev.js --watch -d",
     "docs": "/node_modules/.bin/esdoc",
-    "start": "webpack-dev-server --config=webpack.dev.js"
+    "start": "webpack-dev-server --config=webpack.dev.js --inline=false"
   },
   "repository": {
     "type": "git",
